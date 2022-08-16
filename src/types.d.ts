@@ -1,4 +1,4 @@
-import { Types } from 'mongoose';
+import { HydratedDocument, Types } from 'mongoose';
 
 export type UserRole = 'admin' | 'editor' | 'seller' | 'user';
 
@@ -9,6 +9,13 @@ export interface IImage {
   format?: string;
   type?: string;
   url?: string;
+}
+
+export interface registerBody {
+  name: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
 }
 
 export interface IUserModel {
@@ -22,3 +29,5 @@ export interface IUserModel {
   employee?: Types.ObjectId;
   customer?: Types.ObjectId;
 }
+
+export type UserModelHydrated = HydratedDocument<IUserModel>;
