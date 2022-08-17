@@ -11,7 +11,8 @@
     "lint:fix": "eslint src/**/*.ts --fix",
     "format:check": "prettier --check src/**/*.ts",
     "format:write": "prettier --write src/**/*.ts",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "presets": "ts-node src/utils/cloudinary/index.ts"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.2",
