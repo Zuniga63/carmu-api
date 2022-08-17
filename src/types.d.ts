@@ -31,3 +31,17 @@ export interface IUserModel {
 }
 
 export type UserModelHydrated = HydratedDocument<IUserModel>;
+
+// ----------------------------------------------------------------------------
+// CATEGORIES
+// ----------------------------------------------------------------------------
+export interface ICategory {
+  name: string;
+  slug: string;
+  description?: string;
+  image?: IImage;
+  order: number;
+  isEnabled: boolean;
+  products: Types.ObjectId[];
+  urlSlug: string;
+}
