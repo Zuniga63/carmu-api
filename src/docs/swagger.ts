@@ -16,6 +16,10 @@ const swaggerDefinition: OAS3Definition = {
       name: 'Auth',
       description: 'All end point for register and auth',
     },
+    {
+      name: 'Category',
+      description: 'All end point for admin categories.',
+    },
   ],
   components: {
     securitySchemes: {
@@ -167,6 +171,70 @@ const swaggerDefinition: OAS3Definition = {
                 },
               },
             },
+          },
+        },
+      },
+      registerCategory: {
+        type: 'object',
+        required: ['name'],
+        properties: {
+          name: {
+            type: 'string',
+            example: 'Categoría 1',
+          },
+          description: {
+            type: 'string',
+            example: 'This is a description of category and completly optional.',
+          },
+          image: {
+            type: 'string',
+            format: 'binary',
+          },
+        },
+      },
+      newCategory: {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'string',
+            example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9',
+          },
+          name: {
+            type: 'string',
+            example: 'Categoría 1',
+          },
+          slug: {
+            type: 'string',
+            example: 'categoria_1',
+          },
+          description: {
+            type: 'string',
+            example: 'Una descripción muy descriptiva.',
+          },
+          image: {
+            $ref: '#/components/schemas/image',
+          },
+          order: {
+            type: 'number',
+            example: 1,
+          },
+          isEnabled: {
+            type: 'boolean',
+            example: true,
+          },
+          products: {
+            type: 'array',
+            items: {
+              type: 'string',
+            },
+          },
+          createdAt: {
+            type: 'string',
+            format: 'date-time',
+          },
+          updatedAt: {
+            type: 'string',
+            format: 'date-time',
           },
         },
       },

@@ -45,3 +45,5 @@ export interface ICategory {
   products: Types.ObjectId[];
   urlSlug: string;
 }
+
+export type StoreCategoryRequest = Pick<ICategory, 'name' | 'description' | 'image'>;

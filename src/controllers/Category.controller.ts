@@ -1,4 +1,7 @@
 import { Request, Response } from 'express';
+import { destroyResource } from 'src/middleware/formData';
+import CategoryModel from 'src/models/Category.model';
+import { StoreCategoryRequest } from 'src/types';
 import sendError from 'src/utils/sendError';
 
 export async function list(_req: Request, res: Response) {
@@ -9,10 +12,23 @@ export async function list(_req: Request, res: Response) {
   }
 }
 
-export async function store(_req: Request, res: Response) {
+export async function store(req: Request, res: Response) {
+  const { name, description, image }: StoreCategoryRequest = req.body;
   try {
-    //
+    // get the count of category in databse
+    const count = await CategoryModel.count();
+
+    // create a new category
+    const category = await CategoryModel.create({
+      name,
+      description,
+      image,
+      order: count + 1,
+    });
+
+    res.status(201).json({ category });
   } catch (error) {
+    if (image) await destroyResource(image.publicId);
     sendError(error, res);
   }
 }
