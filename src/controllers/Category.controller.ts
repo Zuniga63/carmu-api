@@ -6,7 +6,8 @@ import sendError from 'src/utils/sendError';
 
 export async function list(_req: Request, res: Response) {
   try {
-    //
+    const categories = await CategoryModel.find().sort('name');
+    res.status(200).json({ categories });
   } catch (error) {
     sendError(error, res);
   }

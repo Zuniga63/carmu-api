@@ -205,7 +205,7 @@ const swaggerDefinition: OAS3Definition = {
           },
           slug: {
             type: 'string',
-            example: 'categoria_1',
+            example: 'categoria-1',
           },
           description: {
             type: 'string',
@@ -227,6 +227,10 @@ const swaggerDefinition: OAS3Definition = {
             items: {
               type: 'string',
             },
+          },
+          urlSlug: {
+            type: 'string',
+            example: 'categoria-1',
           },
           createdAt: {
             type: 'string',
