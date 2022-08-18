@@ -1,5 +1,4 @@
 import { Request, Response, NextFunction } from 'express';
-// import UserModel from 'src/models/User.model';
 import AuthError from 'src/utils/errors/AuthError';
 import sendError from 'src/utils/sendError';
 import getUserFromAuthorization from 'src/utils/getUserFromAuthorization';
