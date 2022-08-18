@@ -15,6 +15,8 @@ export default function sendError(error: any, res: Response) {
       info.validationErrors = error.errors;
       code = 422;
       break;
+    case 'TokenExpiredError':
+    case 'JsonWebTokenError':
     case 'AuthError':
       code = 401;
       break;
