@@ -256,6 +256,69 @@ const swaggerDefinition: OAS3Definition = {
           },
         },
       },
+      showCategory: {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'string',
+            example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9',
+          },
+          mainCategory: {
+            $ref: '#/components/schemas/newCategory',
+          },
+          name: {
+            type: 'string',
+            example: 'Categoría 1',
+          },
+          slug: {
+            type: 'string',
+            example: 'categoria-1',
+          },
+          description: {
+            type: 'string',
+            example: 'Una descripción muy descriptiva.',
+          },
+          image: {
+            $ref: '#/components/schemas/image',
+          },
+          level: {
+            type: 'number',
+            example: 0,
+          },
+          order: {
+            type: 'number',
+            example: 1,
+          },
+          isEnabled: {
+            type: 'boolean',
+            example: true,
+          },
+          products: {
+            type: 'array',
+            items: {
+              type: 'string',
+            },
+          },
+          subcategories: {
+            type: 'array',
+            items: {
+              $ref: '#/components/schemas/newCategory',
+            },
+          },
+          urlSlug: {
+            type: 'string',
+            example: 'categoria-1',
+          },
+          createdAt: {
+            type: 'string',
+            format: 'date-time',
+          },
+          updatedAt: {
+            type: 'string',
+            format: 'date-time',
+          },
+        },
+      },
     },
   },
 };

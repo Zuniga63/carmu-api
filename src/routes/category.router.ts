@@ -66,8 +66,39 @@ router.route('/').get(controller.list);
  *      - bearerAuth: []
  */
 router.route('/').post(formData, controller.store);
-router.route('/:id').get(controller.show);
-router.route('/:id').put(controller.update);
-router.route('/:id').delete(controller.destroy);
+/**
+ * Route for register new category
+ * @openapi
+ * /categories/:categoryId:
+ *  get:
+ *    tags:
+ *      - Category
+ *    sumary: Register new category
+ *    description: This end point register a new category in local database
+ *    parameters:
+ *      - name: categoryId
+ *        in: path
+ *        description: category id of find
+ *        required: true
+ *    responses:
+ *      '200':
+ *        description: Category data
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                category:
+ *                  $ref: '#/components/schemas/showCategory'
+ *      '401':
+ *        description: only admins or editors can use this end point.
+ *      '404':
+ *        description: Category not found in DB
+ *    security:
+ *      - bearerAuth: []
+ */
+router.route('/:categoryId').get(controller.show);
+router.route('/:categoryId').put(controller.update);
+router.route('/:categoryId').delete(controller.destroy);
 
 export default router;
