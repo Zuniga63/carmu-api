@@ -4,6 +4,10 @@ import { createSlug } from 'src/utils';
 
 const schema = new Schema<ICategory, Model<ICategory>>(
   {
+    mainCategory: {
+      type: Schema.Types.ObjectId,
+      ref: 'Category',
+    },
     name: {
       type: String,
       minlength: [3, 'Debe tener minimo 3 caracteres.'],
@@ -34,6 +38,10 @@ const schema = new Schema<ICategory, Model<ICategory>>(
       maxlength: [255, 'Debe tener una maximo de 255 caracteres'],
     },
     image: Object,
+    level: {
+      type: Number,
+      default: 0,
+    },
     order: {
       type: Number,
       default: 0,
@@ -43,6 +51,7 @@ const schema = new Schema<ICategory, Model<ICategory>>(
       default: true,
     },
     products: [{ type: Schema.Types.ObjectId, ref: 'Product' }],
+    subcategories: [{ type: Schema.Types.ObjectId, ref: 'Category' }],
   },
   { timestamps: true },
 );
