@@ -199,6 +199,10 @@ const swaggerDefinition: OAS3Definition = {
             type: 'string',
             example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9',
           },
+          mainCategory: {
+            type: 'string',
+            example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9',
+          },
           name: {
             type: 'string',
             example: 'Categoría 1',
@@ -214,6 +218,10 @@ const swaggerDefinition: OAS3Definition = {
           image: {
             $ref: '#/components/schemas/image',
           },
+          level: {
+            type: 'number',
+            example: 0,
+          },
           order: {
             type: 'number',
             example: 1,
@@ -223,6 +231,12 @@ const swaggerDefinition: OAS3Definition = {
             example: true,
           },
           products: {
+            type: 'array',
+            items: {
+              type: 'string',
+            },
+          },
+          subcategories: {
             type: 'array',
             items: {
               type: 'string',
