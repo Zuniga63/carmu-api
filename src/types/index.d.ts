@@ -36,13 +36,16 @@ export type UserModelHydrated = HydratedDocument<IUserModel>;
 // CATEGORIES
 // ----------------------------------------------------------------------------
 export interface ICategory {
+  mainCategory?: Types.ObjectId;
   name: string;
   slug: string;
   description?: string;
   image?: IImage;
+  level: number;
   order: number;
   isEnabled: boolean;
   products: Types.ObjectId[];
+  subcategories: Types.ObjectId[];
   urlSlug: string;
 }
 
