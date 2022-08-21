@@ -192,7 +192,7 @@ const swaggerDefinition: OAS3Definition = {
           },
         },
       },
-      newCategory: {
+      categoryLite: {
         type: 'object',
         properties: {
           id: {
@@ -264,7 +264,7 @@ const swaggerDefinition: OAS3Definition = {
             example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9',
           },
           mainCategory: {
-            $ref: '#/components/schemas/newCategory',
+            $ref: '#/components/schemas/categoryLite',
           },
           name: {
             type: 'string',
@@ -302,7 +302,7 @@ const swaggerDefinition: OAS3Definition = {
           subcategories: {
             type: 'array',
             items: {
-              $ref: '#/components/schemas/newCategory',
+              $ref: '#/components/schemas/categoryLite',
             },
           },
           urlSlug: {
@@ -316,6 +316,32 @@ const swaggerDefinition: OAS3Definition = {
           updatedAt: {
             type: 'string',
             format: 'date-time',
+          },
+        },
+      },
+      updateCategory: {
+        type: 'object',
+        required: ['name'],
+        properties: {
+          name: {
+            type: 'string',
+            example: 'Categoría 1',
+          },
+          description: {
+            type: 'string',
+            example: 'Una descripción muy descriptiva.',
+          },
+          order: {
+            type: 'number',
+            example: 1,
+          },
+          isEnabled: {
+            type: 'boolean',
+            example: true,
+          },
+          image: {
+            type: 'string',
+            format: 'binary',
           },
         },
       },

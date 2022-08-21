@@ -23,7 +23,7 @@ const router = Router();
  *                categories:
  *                  type: array
  *                  items:
- *                    $ref: '#/components/schemas/newCategory'
+ *                    $ref: '#/components/schemas/categoryLite'
  *      '401':
  *        description: only admins or editors can use this end point.
  *    security:
@@ -53,7 +53,7 @@ router.route('/').get(controller.list);
  *              type: object
  *              properties:
  *                category:
- *                  $ref: '#/components/schemas/newCategory'
+ *                  $ref: '#/components/schemas/categoryLite'
  *      '401':
  *        description: only admins or editors can use this end point.
  *      '422':
@@ -98,7 +98,43 @@ router.route('/').post(formData, controller.store);
  *      - bearerAuth: []
  */
 router.route('/:categoryId').get(controller.show);
-router.route('/:categoryId').put(controller.update);
+/**
+ * Route for register new category
+ * @openapi
+ * /categories/:categoryId:
+ *  put:
+ *    tags:
+ *      - Category
+ *    sumary: Update a category by id
+ *    description: This end point update the information of category and sort other categories
+ *    requestBody:
+ *      content:
+ *        multipart/form-data:
+ *          schema:
+ *            $ref: '#/components/schemas/updateCategory'
+ *    parameters:
+ *      - name: categoryId
+ *        in: path
+ *        description: category id of find
+ *        required: true
+ *    responses:
+ *      '200':
+ *        description: Category data
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                category:
+ *                  $ref: '#/components/schemas/categoryLite'
+ *      '401':
+ *        description: only admins or editors can use this end point.
+ *      '404':
+ *        description: Category not found in DB
+ *    security:
+ *      - bearerAuth: []
+ */
+router.route('/:categoryId').put(formData, controller.update);
 router.route('/:categoryId').delete(controller.destroy);
 
 export default router;

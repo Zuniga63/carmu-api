@@ -50,3 +50,7 @@ export interface ICategory {
 }
 
 export type StoreCategoryRequest = Pick<ICategory, 'name' | 'description' | 'image'>;
+export interface UpdateCategoryRequest extends Pick<ICategory, 'name' | 'description' | 'image'> {
+  isEnabled?: string;
+  order?: string;
+}
