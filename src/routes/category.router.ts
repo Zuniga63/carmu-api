@@ -135,6 +135,37 @@ router.route('/:categoryId').get(controller.show);
  *      - bearerAuth: []
  */
 router.route('/:categoryId').put(formData, controller.update);
+/**
+ * Route for register new category
+ * @openapi
+ * /categories/:categoryId:
+ *  delete:
+ *    tags:
+ *      - Category
+ *    sumary: delete one category of database
+ *    description: This end point delete a category of database and update the order of other categories.
+ *    parameters:
+ *      - name: categoryId
+ *        in: path
+ *        description: category id of find
+ *        required: true
+ *    responses:
+ *      '200':
+ *        description: Category deleted
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                category:
+ *                  $ref: '#/components/schemas/categoryLite'
+ *      '401':
+ *        description: only admins or editors can use this end point.
+ *      '404':
+ *        description: Category not found in DB
+ *    security:
+ *      - bearerAuth: []
+ */
 router.route('/:categoryId').delete(controller.destroy);
 
 export default router;

@@ -49,6 +49,8 @@ export interface ICategory {
   urlSlug: string;
 }
 
+export type CategoryHydrated = HydratedDocument<ICategory>;
+
 export type StoreCategoryRequest = Pick<ICategory, 'name' | 'description' | 'image'>;
 export interface UpdateCategoryRequest extends Pick<ICategory, 'name' | 'description' | 'image'> {
   isEnabled?: string;

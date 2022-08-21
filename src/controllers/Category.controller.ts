@@ -65,22 +65,7 @@ export async function update(req: Request, res: Response) {
     category.isEnabled = isEnabled ? isEnabled === 'true' : false;
 
     // update order
-    if (!isNaN(order) && category.order !== order) {
-      await CategoryModel.updateMany({ mainCategory: category.mainCategory }, { $inc: { order: -1 } })
-        .where('order')
-        .gt(category.order);
-
-      const max = await CategoryModel.count().where('mainCategory', category.mainCategory);
-      if (order < max) {
-        await CategoryModel.updateMany({ mainCategory: category.mainCategory }, { $inc: { order: 1 } })
-          .where('_id')
-          .ne(category._id)
-          .where('order')
-          .gte(order);
-      }
-
-      category.order = order <= max ? order : max;
-    }
+    if (!isNaN(order) && category.order !== order) category.order = order;
 
     const lastImage = category.image;
     if (image) category.image = image;
@@ -95,9 +80,14 @@ export async function update(req: Request, res: Response) {
   }
 }
 
-export async function destroy(_req: Request, res: Response) {
+export async function destroy(req: Request, res: Response) {
+  const { categoryId } = req.params;
+
   try {
-    //
+    const category = await CategoryModel.findByIdAndDelete(categoryId);
+    if (!category) throw new NotFoundError('Categoría no encontrada.');
+
+    res.status(200).json({ category });
   } catch (error) {
     sendError(error, res);
   }
