@@ -1,5 +1,6 @@
 import { Router } from 'express';
-import { signin, signup } from 'src/controllers/Auth.controller';
+import { isAuthenticated, signin, signup } from 'src/controllers/Auth.controller';
+import userAuth from 'src/middleware/UserAuth';
 
 const router = Router();
 
@@ -62,5 +63,34 @@ router.route('/local/signup').post(signup);
  *        description: Credenciales invalidas
  */
 router.route('/local/signin').post(signin);
+
+/**
+ * Get all categories sort by name
+ * @openapi
+ * /auth/local/is-authenticated:
+ *  get:
+ *    tags:
+ *      - Auth
+ *    sumary: Get basic user data if the user is authenticated
+ *    description: Get basic user data if the user is authenticated
+ *    responses:
+ *      '200':
+ *        description: User is authenticated
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                ok:
+ *                  type: boolean
+ *                  example: true
+ *                user:
+ *                  $ref: '#/components/schemas/user'
+ *      '401':
+ *        description: only users authenticated can use this end point
+ *    security:
+ *      - bearerAuth: []
+ */
+router.route('/local/is-authenticated').get(userAuth, isAuthenticated);
 
 export default router;

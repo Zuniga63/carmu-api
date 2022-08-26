@@ -62,3 +62,12 @@ export async function signin(req: Request, res: Response): Promise<void> {
     sendError(error, res);
   }
 }
+
+export async function isAuthenticated(req: Request, res: Response): Promise<void> {
+  const { user } = req;
+  if (user) {
+    res.status(200).json({ ok: true, user: getPublicUserData(user) });
+  } else {
+    res.status(401).json({ ok: false });
+  }
+}
