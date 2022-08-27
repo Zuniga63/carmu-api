@@ -1,0 +1,171 @@
+import { Router } from 'express';
+import * as controller from 'src/controllers/Category.controller';
+import formData from 'src/middleware/formData';
+
+const router = Router();
+/**
+ * Get all categories sort by name
+ * @openapi
+ * /categories:
+ *  get:
+ *    tags:
+ *      - Category
+ *    sumary: "Get all categories sort by name"
+ *    description: This end point Get all categories sort by name
+ *    responses:
+ *      '200':
+ *        description: Category was store sucessfully
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                categories:
+ *                  type: array
+ *                  items:
+ *                    $ref: '#/components/schemas/categoryLite'
+ *      '401':
+ *        description: only admins or editors can use this end point.
+ *    security:
+ *      - bearerAuth: []
+ */
+router.route('/').get(controller.list);
+/**
+ * Route for register new category
+ * @openapi
+ * /categories:
+ *  post:
+ *    tags:
+ *      - Category
+ *    sumary: Register new category
+ *    description: This end point register a new category in local database
+ *    requestBody:
+ *      content:
+ *        multipart/form-data:
+ *          schema:
+ *            $ref: '#/components/schemas/registerCategory'
+ *    responses:
+ *      '201':
+ *        description: Category was store sucessfully
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                category:
+ *                  $ref: '#/components/schemas/categoryLite'
+ *      '401':
+ *        description: only admins or editors can use this end point.
+ *      '422':
+ *        description: Invalid Input
+ *        content:
+ *          application/json:
+ *            schema:
+ *              $ref: '#/components/schemas/validationError'
+ *    security:
+ *      - bearerAuth: []
+ */
+router.route('/').post(formData, controller.store);
+/**
+ * Route for register new category
+ * @openapi
+ * /categories/:categoryId:
+ *  get:
+ *    tags:
+ *      - Category
+ *    sumary: Register new category
+ *    description: This end point register a new category in local database
+ *    parameters:
+ *      - name: categoryId
+ *        in: path
+ *        description: category id of find
+ *        required: true
+ *    responses:
+ *      '200':
+ *        description: Category data
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                category:
+ *                  $ref: '#/components/schemas/showCategory'
+ *      '401':
+ *        description: only admins or editors can use this end point.
+ *      '404':
+ *        description: Category not found in DB
+ *    security:
+ *      - bearerAuth: []
+ */
+router.route('/:categoryId').get(controller.show);
+/**
+ * Route for register new category
+ * @openapi
+ * /categories/:categoryId:
+ *  put:
+ *    tags:
+ *      - Category
+ *    sumary: Update a category by id
+ *    description: This end point update the information of category and sort other categories
+ *    requestBody:
+ *      content:
+ *        multipart/form-data:
+ *          schema:
+ *            $ref: '#/components/schemas/updateCategory'
+ *    parameters:
+ *      - name: categoryId
+ *        in: path
+ *        description: category id of find
+ *        required: true
+ *    responses:
+ *      '200':
+ *        description: Category data
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                category:
+ *                  $ref: '#/components/schemas/categoryLite'
+ *      '401':
+ *        description: only admins or editors can use this end point.
+ *      '404':
+ *        description: Category not found in DB
+ *    security:
+ *      - bearerAuth: []
+ */
+router.route('/:categoryId').put(formData, controller.update);
+/**
+ * Route for register new category
+ * @openapi
+ * /categories/:categoryId:
+ *  delete:
+ *    tags:
+ *      - Category
+ *    sumary: delete one category of database
+ *    description: This end point delete a category of database and update the order of other categories.
+ *    parameters:
+ *      - name: categoryId
+ *        in: path
+ *        description: category id of find
+ *        required: true
+ *    responses:
+ *      '200':
+ *        description: Category deleted
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                category:
+ *                  $ref: '#/components/schemas/categoryLite'
+ *      '401':
+ *        description: only admins or editors can use this end point.
+ *      '404':
+ *        description: Category not found in DB
+ *    security:
+ *      - bearerAuth: []
+ */
+router.route('/:categoryId').delete(controller.destroy);
+
+export default router;
