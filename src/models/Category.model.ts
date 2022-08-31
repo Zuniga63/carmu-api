@@ -2,6 +2,7 @@ import { Schema, model, models, Model } from 'mongoose';
 import { destroyResource } from 'src/middleware/formData';
 import { CategoryHydrated, ICategory } from 'src/types';
 import { createSlug } from 'src/utils';
+import NotFoundError from 'src/utils/errors/NotFoundError';
 
 const schema = new Schema<ICategory, Model<ICategory>>(
   {
@@ -114,12 +115,11 @@ schema.pre('findOneAndDelete', async function preQuery(next) {
   try {
     if (_id) {
       const category = await models.Category.findById(_id);
-      console.log('Category to delete: ', category?.name);
+      if (!category) throw new NotFoundError('Categoría no encontrada.');
 
       // Delete the image of cloudinary
       if (category.image && category.image.publicId) {
         await destroyResource(category.image.publicId);
-        console.log('Image of category %s is delete [%s]', category?.name, category.image.publicId);
       }
 
       // TODO: Code for remove of products.
@@ -127,14 +127,13 @@ schema.pre('findOneAndDelete', async function preQuery(next) {
       // TODO: Code for delete subcategories.
 
       // *Update the order of categories in the level
-      const resort = await models.Category.updateMany({ mainCategory: category.mainCategory }, { $inc: { order: -1 } })
+      await models.Category.updateMany({ mainCategory: category.mainCategory }, { $inc: { order: -1 } })
         .where('order')
         .gt(category.order);
-
-      console.log('categories updates order: ', resort.modifiedCount);
       next();
     }
   } catch (error: any) {
+    console.log('Error in the Cateogry model');
     next(error);
   }
 });
