@@ -345,6 +345,21 @@ const swaggerDefinition: OAS3Definition = {
           },
         },
       },
+      updateCategoryOrderRequest: {
+        type: 'object',
+        required: ['categoryIds'],
+        properties: {
+          categoryIds: {
+            type: 'array',
+            items: {
+              type: 'string',
+            },
+          },
+          mainCategory: {
+            type: 'string',
+          },
+        },
+      },
     },
   },
 };

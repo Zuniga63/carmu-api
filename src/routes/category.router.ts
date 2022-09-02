@@ -167,5 +167,35 @@ router.route('/:categoryId').put(formData, controller.update);
  *      - bearerAuth: []
  */
 router.route('/:categoryId').delete(controller.destroy);
+/**
+ * Route for register new category
+ * @openapi
+ * /categories/update-order:
+ *  post:
+ *    tags:
+ *      - Category
+ *    sumary: Store the new order of categories
+ *    description: This end point store the new order of categories.
+ *    requestBody:
+ *      content:
+ *        application/json:
+ *          schema:
+ *            $ref: '#/components/schemas/updateCategoryOrderRequest'
+ *    responses:
+ *      '200':
+ *        description: Order is save or not
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                ok:
+ *                  type: 'boolean'
+ *      '401':
+ *        description: only admins or editors can use this end point.
+ *    security:
+ *      - bearerAuth: []
+ */
+router.route('/update-order').post(controller.storeNewOrder);
 
 export default router;

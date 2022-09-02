@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { destroyResource } from 'src/middleware/formData';
 import CategoryModel from 'src/models/Category.model';
-import { StoreCategoryRequest, UpdateCategoryRequest } from 'src/types';
+import { CategoryHydrated, StoreCategoryRequest, UpdateCategoryRequest } from 'src/types';
 import NotFoundError from 'src/utils/errors/NotFoundError';
 import sendError from 'src/utils/sendError';
 
@@ -88,6 +88,42 @@ export async function destroy(req: Request, res: Response) {
     if (!category) throw new NotFoundError('Categoría no encontrada.');
 
     res.status(200).json({ category });
+  } catch (error) {
+    sendError(error, res);
+  }
+}
+
+export async function storeNewOrder(req: Request, res: Response) {
+  const { categoryIds, mainCategory }: { categoryIds: string[]; mainCategory: undefined | string } = req.body;
+  const categories: CategoryHydrated[] = [];
+
+  try {
+    if (categoryIds instanceof Array<string>) {
+      // Get the count of categories of three
+      const count = await CategoryModel.count().where({ mainCategory });
+
+      if (categoryIds.length === count) {
+        // Recover each categories instances
+        await Promise.all(
+          categoryIds.map(async (categoryId, index) => {
+            const order = index + 1;
+            const category = await CategoryModel.findById(categoryId);
+            if (category && category.order !== order) {
+              category.order = index + 1;
+              categories.push(category);
+            }
+          }),
+        );
+
+        // Save the new order category
+        await Promise.all(categories.map((category) => category.save({ validateModifiedOnly: true })));
+
+        res.status(200).json({ ok: true });
+        return;
+      }
+    }
+
+    res.status(200).json({ ok: false });
   } catch (error) {
     sendError(error, res);
   }
