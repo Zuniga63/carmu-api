@@ -72,10 +72,10 @@ schema.pre('save', async function preSave(next) {
       const previousCategory: CategoryHydrated | undefined = await models.Category.findById(category.id).select(
         '_id order',
       );
-      console.log('The order of category change to: %d from %d', category.order, previousCategory?.order);
 
       // update the order of next categories
       if (previousCategory) {
+        console.log('The order of category change to: %d from %d', category.order, previousCategory?.order);
         const reduceOrder = await models.Category.updateMany(
           { mainCategory: category.mainCategory },
           { $inc: { order: -1 } },
