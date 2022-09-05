@@ -67,7 +67,7 @@ export interface ICashbox {
   users: Types.ObjectId[];
   name: string;
   base: number;
-  lastClosing?: Date;
+  boxOpen?: Date;
   transactions: Types.ObjectId[];
   closingRecords: Types.ObjectId[];
 }
@@ -78,6 +78,7 @@ export interface ICashboxTransaction {
   cashbox?: Types.ObjectId;
   transactionDate: Date;
   description: string;
+  isTransfer?: boolean;
   amount: number;
 }
 
