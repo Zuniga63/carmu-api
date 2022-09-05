@@ -10,6 +10,9 @@ const swaggerDefinition: OAS3Definition = {
     {
       url: 'http://localhost:8080',
     },
+    {
+      url: 'http://192.168.0.120:8080',
+    },
   ],
   tags: [
     {
@@ -19,6 +22,10 @@ const swaggerDefinition: OAS3Definition = {
     {
       name: 'Category',
       description: 'All end point for admin categories.',
+    },
+    {
+      name: 'Boxes',
+      description: 'All end points for admin boxes, closings and transactions',
     },
   ],
   components: {
@@ -357,6 +364,166 @@ const swaggerDefinition: OAS3Definition = {
           },
           mainCategory: {
             type: 'string',
+          },
+        },
+      },
+      // ----------------------------------------------------------------------
+      // CASHBOX
+      // ----------------------------------------------------------------------
+      cashboxLite: {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'string',
+            example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9',
+          },
+          cashier: {
+            type: 'object',
+            properties: {
+              id: {
+                type: 'string',
+                example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9',
+              },
+              name: {
+                type: 'string',
+                example: 'Cashier name',
+              },
+            },
+          },
+          users: {
+            type: 'array',
+            items: {
+              type: 'string',
+              example: ['eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9'],
+            },
+          },
+          name: {
+            type: 'string',
+            example: 'Box name',
+          },
+          base: {
+            type: 'number',
+            example: 100000,
+          },
+          lastClosing: {
+            type: 'string',
+            format: 'date-time',
+          },
+          createdAt: {
+            type: 'string',
+            format: 'date-time',
+          },
+          updatedAt: {
+            type: 'string',
+            format: 'date-time',
+          },
+        },
+      },
+      newCashboxRequest: {
+        type: 'object',
+        required: ['name'],
+        properties: {
+          name: {
+            type: 'string',
+            example: 'name of new box',
+          },
+          users: {
+            type: 'array',
+            items: {
+              type: 'string',
+              example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9',
+            },
+          },
+        },
+      },
+      updateCashboxRequest: {
+        type: 'object',
+        required: ['name'],
+        properties: {
+          name: {
+            type: 'string',
+            example: 'name of cashbox',
+          },
+        },
+      },
+      updateCashboxResponse: {
+        type: 'object',
+        properties: {
+          cashbox: {
+            type: 'object',
+            properties: {
+              id: {
+                type: 'string',
+                example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9',
+              },
+              name: {
+                type: 'string',
+                example: 'The new name of box',
+              },
+            },
+          },
+        },
+      },
+      fullCashbox: {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'string',
+            example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9',
+          },
+          cashier: {
+            type: 'object',
+            properties: {
+              id: {
+                type: 'string',
+                example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9',
+              },
+              name: {
+                type: 'string',
+                example: 'Cashier name',
+              },
+            },
+          },
+          users: {
+            type: 'array',
+            items: {
+              type: 'string',
+              example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9',
+            },
+          },
+          name: {
+            type: 'string',
+            example: 'Box name',
+          },
+          base: {
+            type: 'number',
+            example: 100000,
+          },
+          lastClosing: {
+            type: 'string',
+            format: 'date-time',
+          },
+          transactions: {
+            type: 'array',
+            items: {
+              type: 'string',
+              example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9',
+            },
+          },
+          closingRecords: {
+            type: 'array',
+            items: {
+              type: 'string',
+              example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9',
+            },
+          },
+          createdAt: {
+            type: 'string',
+            format: 'date-time',
+          },
+          updatedAt: {
+            type: 'string',
+            format: 'date-time',
           },
         },
       },

@@ -11,7 +11,7 @@ const router = Router();
  *  post:
  *    tags:
  *      - Auth
- *    sumary: "Register new user"
+ *    summary: "Register new user"
  *    description: This end point register a new user in local database
  *    requestBody:
  *      content:
@@ -44,7 +44,7 @@ router.route('/local/signup').post(signup);
  *  post:
  *    tags:
  *      - Auth
- *    sumary: "Login the user with token"
+ *    summary: "Login the user with token"
  *    description: This end point create a token for auth platform
  *    requestBody:
  *      content:
@@ -71,7 +71,7 @@ router.route('/local/signin').post(signin);
  *  get:
  *    tags:
  *      - Auth
- *    sumary: Get basic user data if the user is authenticated
+ *    summary: Get basic user data if the user is authenticated
  *    description: Get basic user data if the user is authenticated
  *    responses:
  *      '200':

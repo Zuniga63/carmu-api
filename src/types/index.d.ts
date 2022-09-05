@@ -28,6 +28,7 @@ export interface IUserModel {
   role?: UserRole;
   employee?: Types.ObjectId;
   customer?: Types.ObjectId;
+  boxes: Types.ObjectId[];
 }
 
 export type UserModelHydrated = HydratedDocument<IUserModel>;
@@ -55,4 +56,51 @@ export type StoreCategoryRequest = Pick<ICategory, 'name' | 'description' | 'ima
 export interface UpdateCategoryRequest extends Pick<ICategory, 'name' | 'description' | 'image'> {
   isEnabled?: string;
   order?: string;
+}
+
+// ----------------------------------------------------------------------------
+// CASHBOX
+// ----------------------------------------------------------------------------
+
+export interface ICashbox {
+  cashier: Types.ObjectId;
+  users: Types.ObjectId[];
+  name: string;
+  base: number;
+  lastClosing?: Date;
+  transactions: Types.ObjectId[];
+  closingRecords: Types.ObjectId[];
+}
+
+export type CashboxHydrated = HydratedDocument<ICashbox>;
+
+export interface ICashboxTransaction {
+  cashbox?: Types.ObjectId;
+  transactionDate: Date;
+  description: string;
+  amount: number;
+}
+
+export interface IMonetaryValue {
+  denomination: string;
+  value: number;
+  count: number;
+}
+
+export interface CashClosingRecord {
+  cashbox?: Types.ObjectId;
+  user?: Types.ObjectId;
+  cashier?: Types.ObjectId;
+  userName: string;
+  cashierName: string;
+  closingDate: Date;
+  base: number;
+  newBase: number;
+  incomes?: number;
+  expenses?: number;
+  coins?: IMonetaryValue[];
+  bills?: IMonetaryValue[];
+  leftover?: number;
+  missing?: number;
+  observation?: string;
 }
