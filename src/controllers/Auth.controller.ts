@@ -3,7 +3,7 @@ import bcrypt from 'bcryptjs';
 import UserModel from 'src/models/User.model';
 import { UserRole, registerBody, UserModelHydrated } from 'src/types';
 import sendError from 'src/utils/sendError';
-import createToken from 'src/utils';
+import { createToken } from 'src/utils';
 import InvalidSignInError from 'src/utils/errors/InvalidSignInError';
 import ValidationError from 'src/utils/errors/ValidationError';
 

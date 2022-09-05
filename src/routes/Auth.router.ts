@@ -1,6 +1,8 @@
 import { Router } from 'express';
 import { isAuthenticated, signin, signup } from 'src/controllers/Auth.controller';
 import userAuth from 'src/middleware/UserAuth';
+import * as userController from 'src/controllers/User.controller';
+import adminAuth from 'src/middleware/AdminAuth';
 
 const router = Router();
 
@@ -63,7 +65,6 @@ router.route('/local/signup').post(signup);
  *        description: Credenciales invalidas
  */
 router.route('/local/signin').post(signin);
-
 /**
  * Get all categories sort by name
  * @openapi
@@ -92,5 +93,36 @@ router.route('/local/signin').post(signin);
  *      - bearerAuth: []
  */
 router.route('/local/is-authenticated').get(userAuth, isAuthenticated);
+
+// --------------------------------------------------------------------------------------------------------------------
+// ROUTES FOR ADMIN USERS
+// --------------------------------------------------------------------------------------------------------------------
+/**
+ * @openapi
+ * /auth/local/users:
+ *  get:
+ *    tags:
+ *      - Auth
+ *    summary: List of all users
+ *    description: This end point return a list of all user register en the databse
+ *    responses:
+ *      200:
+ *        description: List of all users sort by name
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                users:
+ *                  type: array
+ *                  items:
+ *                    $ref: '#/components/schemas/user'
+ *      401:
+ *        description: only admin users can acces this information
+ *    security:
+ *      - bearerAuth: []
+ *
+ */
+router.route('/local/users').get(adminAuth, userController.list);
 
 export default router;

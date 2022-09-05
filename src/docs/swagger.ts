@@ -76,6 +76,10 @@ const swaggerDefinition: OAS3Definition = {
             type: 'string',
             example: 'jhondoe@email',
           },
+          emailVerifiedAt: {
+            type: 'boolean',
+            example: true,
+          },
           profilePhoto: {
             $ref: '#/components/schemas/image',
           },
