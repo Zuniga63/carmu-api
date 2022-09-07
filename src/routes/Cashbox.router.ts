@@ -56,6 +56,12 @@ router.route('/').get(controller.list);
  *                  $ref: '#/components/schemas/fullCashbox'
  *      401:
  *        description: only auth users can acces the information
+ *      422:
+ *        description: Invalid Input
+ *        content:
+ *          application/json:
+ *            schema:
+ *              $ref: '#/components/schemas/validationError'
  *    security:
  *      - bearerAuth: []
  */
@@ -150,7 +156,7 @@ router.route('/:boxId').put(controller.update);
  *        content:
  *          application/json:
  *            schema:
- *              $ref: '#/components/schemas/fullCashbox'
+ *              $ref: '#/components/schemas/updateCashboxResponse'
  *      401:
  *        description: only auth users can acces the information
  *      404:
@@ -159,5 +165,93 @@ router.route('/:boxId').put(controller.update);
  *      - bearerAuth: []
  */
 router.route('/:boxId').delete(controller.destroy);
+/**
+ * @openapi
+ * /boxes/{boxId}/open:
+ *  put:
+ *    tags:
+ *      - Boxes
+ *    summary: Start a close box with a cashier
+ *    description: This end point init a box for start register transactions.
+ *    parameters:
+ *      - name: boxId
+ *        in: path
+ *        description: The id of box init
+ *        required: true
+ *        schema:
+ *          type: string
+ *    requestBody:
+ *      description: Cashier and new base of box.
+ *      content:
+ *        application/json:
+ *          schema:
+ *            $ref: '#/components/schemas/openBoxRequest'
+ *    responses:
+ *      200:
+ *        description: The result of operation
+ *        content:
+ *          application/json:
+ *            schema:
+ *              $ref: '#/components/schemas/openBoxResponse'
+ *      400:
+ *        description: The box is open
+ *      401:
+ *        description: Session expired or unauthorize
+ *      404:
+ *        description: The cashbox or the cashier not found in the database
+ *      422:
+ *        description: Invalid Input
+ *        content:
+ *          application/json:
+ *            schema:
+ *              $ref: '#/components/schemas/validationError'
+ *    security:
+ *      - bearerAuth: []
+ */
+router.route('/:boxId/open').put(controller.openBox);
+/**
+ * @openapi
+ * /boxes/{boxId}/close:
+ *  put:
+ *    tags:
+ *      - Boxes
+ *    summary: Close a open box
+ *    description: This end point close and reset a open box
+ *    parameters:
+ *      - name: boxId
+ *        in: path
+ *        description: The id of box to close
+ *        required: true
+ *        schema:
+ *          type: string
+ *    requestBody:
+ *      description: Cash count in the box and observatión
+ *      content:
+ *        application/json:
+ *          schema:
+ *            $ref: '#/components/schemas/closeBoxRequest'
+ *    responses:
+ *      200:
+ *        description: The result of operation
+ *        content:
+ *          application/json:
+ *            schema:
+ *              $ref: '#/components/schemas/closeBoxResponse'
+ *      400:
+ *        description: The box is not open
+ *      401:
+ *        description: Session expired or unauthorize
+ *      404:
+ *        description: The cashbox not found in the database
+ *      422:
+ *        description: Invalid Input
+ *        content:
+ *          application/json:
+ *            schema:
+ *              $ref: '#/components/schemas/validationError'
+ *    security:
+ *      - bearerAuth: []
+ */
+router.route('/:boxId/close').put(controller.closeBox);
 
 export default router;

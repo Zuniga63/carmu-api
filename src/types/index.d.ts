@@ -63,11 +63,13 @@ export interface UpdateCategoryRequest extends Pick<ICategory, 'name' | 'descrip
 // ----------------------------------------------------------------------------
 
 export interface ICashbox {
-  cashier: Types.ObjectId;
+  cashier?: Types.ObjectId;
   users: Types.ObjectId[];
   name: string;
+  cashierName?: string;
   base: number;
-  boxOpen?: Date;
+  openBox?: Date;
+  closed?: Date;
   transactions: Types.ObjectId[];
   closingRecords: Types.ObjectId[];
 }
@@ -82,26 +84,46 @@ export interface ICashboxTransaction {
   amount: number;
 }
 
+export type CashboxTransactionHydrated = HydratedDocument<ICashboxTransaction>;
+
 export interface IMonetaryValue {
   denomination: string;
   value: number;
   count: number;
 }
 
-export interface CashClosingRecord {
+export interface ICashClosingRecord {
   cashbox?: Types.ObjectId;
   user?: Types.ObjectId;
   cashier?: Types.ObjectId;
-  userName: string;
-  cashierName: string;
+  userName?: string;
+  cashierName?: string;
+  boxName?: string;
+  opened: Date;
   closingDate: Date;
   base: number;
-  newBase: number;
   incomes?: number;
   expenses?: number;
+  cash: number;
   coins?: IMonetaryValue[];
   bills?: IMonetaryValue[];
   leftover?: number;
   missing?: number;
   observation?: string;
+  transactions: Types.ObjectId[];
+}
+
+export type CashClosingRecordHydrated = HydratedDocument<ICashClosingRecord>;
+
+// ----------------------------------------------------------------------------
+// VALIDATIONS
+// ----------------------------------------------------------------------------
+export interface IValidationErrors {
+  [key: string]: {
+    name: string;
+    message: string;
+    kind?: string;
+    path?: string;
+    value?: string;
+  };
 }

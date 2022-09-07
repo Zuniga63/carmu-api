@@ -405,11 +405,19 @@ const swaggerDefinition: OAS3Definition = {
             type: 'string',
             example: 'Box name',
           },
+          cashierName: {
+            type: 'string',
+            example: 'Jhon Doe',
+          },
           base: {
             type: 'number',
             example: 100000,
           },
-          lastClosing: {
+          openBox: {
+            type: 'string',
+            format: 'date-time',
+          },
+          closed: {
             type: 'string',
             format: 'date-time',
           },
@@ -431,7 +439,7 @@ const swaggerDefinition: OAS3Definition = {
             type: 'string',
             example: 'name of new box',
           },
-          users: {
+          userIds: {
             type: 'array',
             items: {
               type: 'string',
@@ -528,6 +536,144 @@ const swaggerDefinition: OAS3Definition = {
           updatedAt: {
             type: 'string',
             format: 'date-time',
+          },
+        },
+      },
+      openBoxRequest: {
+        type: 'object',
+        required: ['cashierId', 'base'],
+        properties: {
+          cashierId: {
+            type: 'string',
+            example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9',
+          },
+          base: {
+            type: 'number',
+            example: 100000,
+          },
+        },
+      },
+      openBoxResponse: {
+        type: 'object',
+        required: ['cashierId', 'base'],
+        properties: {
+          cashbox: {
+            $ref: '#/components/schemas/fullCashbox',
+          },
+        },
+      },
+      closingRecordLite: {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'string',
+            example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9',
+          },
+          cashbox: {
+            type: 'string',
+            example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9',
+          },
+          user: {
+            type: 'string',
+            example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9',
+          },
+          cashier: {
+            type: 'string',
+            example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9',
+          },
+          userName: {
+            type: 'string',
+            example: 'Administrador',
+          },
+          cashierName: {
+            type: 'string',
+            example: 'Cashier Name',
+          },
+          boxName: {
+            type: 'string',
+            example: 'Cashier Name',
+          },
+          opened: {
+            type: 'string',
+            format: 'date-time',
+          },
+          closingDate: {
+            type: 'string',
+            format: 'date-time',
+          },
+          base: {
+            type: 'number',
+            example: 100000,
+          },
+          incomes: {
+            type: 'number',
+            example: 100000,
+          },
+          expenses: {
+            type: 'number',
+            example: 50000,
+          },
+          cash: {
+            type: 'number',
+            example: 140000,
+          },
+          coin: {
+            type: 'object',
+          },
+          bills: {
+            type: 'object',
+          },
+          leftover: {
+            type: 'number',
+            example: 1000,
+          },
+          missing: {
+            type: 'number',
+            example: 10000,
+          },
+          observation: {
+            type: 'string',
+            example: 'This is a observation.',
+          },
+          transactions: {
+            type: 'array',
+            items: {
+              type: 'string',
+              example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9',
+            },
+          },
+          createdAt: {
+            type: 'string',
+            format: 'date-time',
+          },
+          updatedAt: {
+            type: 'string',
+            format: 'date-time',
+          },
+        },
+      },
+      closeBoxRequest: {
+        type: 'object',
+        required: ['cash'],
+        properties: {
+          cash: {
+            type: 'number',
+            example: 100000,
+          },
+          observation: {
+            type: 'string',
+            example: 'This is a good observatio about cashier.',
+          },
+        },
+      },
+      closeBoxResponse: {
+        type: 'object',
+        properties: {
+          cashox: {
+            $ref: '#/components/schemas/fullCashbox',
+          },
+          closing: {
+            $ref: '#/components/schemas/closingRecordLite',
           },
         },
       },
