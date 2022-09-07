@@ -677,6 +677,39 @@ const swaggerDefinition: OAS3Definition = {
           },
         },
       },
+      transaction: {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'string',
+            example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9',
+          },
+          transactionDate: {
+            type: 'string',
+            format: 'date-time',
+          },
+          description: {
+            type: 'string',
+            example: 'This is a description of transaction',
+          },
+          isTransfer: {
+            type: 'boolean',
+            example: false,
+          },
+          amount: {
+            type: 'number',
+            example: 100000,
+          },
+          createdAt: {
+            type: 'string',
+            format: 'date-time',
+          },
+          updatedAt: {
+            type: 'string',
+            format: 'date-time',
+          },
+        },
+      },
     },
   },
 };

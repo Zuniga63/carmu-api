@@ -253,5 +253,41 @@ router.route('/:boxId/open').put(controller.openBox);
  *      - bearerAuth: []
  */
 router.route('/:boxId/close').put(controller.closeBox);
+/**
+ * @openapi
+ * /boxes/{:boxId}/transactions:
+ *  get:
+ *    tags:
+ *      - Boxes
+ *    summary: Get all transactions of cashbox
+ *    description: This end point get the array of transaction sort by transactionDate
+ *    parameters:
+ *      - name: boxId
+ *        in: path
+ *        description: The id of box of search
+ *        required: true
+ *        schema:
+ *          type: string
+ *    responses:
+ *      '200':
+ *        description: List of transaction.
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                transactions:
+ *                  type: array
+ *                  items:
+ *                    $ref: '#/components/schemas/transaction'
+ *      401:
+ *        description: only auth users can acces the information
+ *    security:
+ *      - bearerAuth: []
+ */
+router.route('/:boxId/transactions').get(controller.listTransactions);
+router.route('/:boxId/transactions').post(controller.addTransaction);
+router.route('/:boxId/transactions/:transactionId').put(controller.updateTransaction);
+router.route('/:boxId/transactions/:transactionId').delete(controller.destroyTransaction);
 
 export default router;

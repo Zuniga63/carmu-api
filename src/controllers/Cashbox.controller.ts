@@ -317,3 +317,40 @@ export async function closeBox(req: Request, res: Response) {
     sendError(error, res);
   }
 }
+
+export async function listTransactions(req: Request, res: Response) {
+  const { boxId } = req.params;
+  try {
+    const transactions = await CashboxTransactionModel.find({ cashbox: boxId }).sort('transactionDate');
+    res.status(200).json({ transactions });
+  } catch (error) {
+    sendError(error, res);
+  }
+}
+
+export async function addTransaction(_req: Request, res: Response) {
+  // const { boxid } = req.params;
+  try {
+    // TODO
+  } catch (error) {
+    sendError(error, res);
+  }
+}
+
+export async function updateTransaction(_req: Request, res: Response) {
+  // const { boxid } = req.params;
+  try {
+    // TODO
+  } catch (error) {
+    sendError(error, res);
+  }
+}
+
+export async function destroyTransaction(_req: Request, res: Response) {
+  // const { boxid } = req.params;
+  try {
+    // TODO
+  } catch (error) {
+    sendError(error, res);
+  }
+}
