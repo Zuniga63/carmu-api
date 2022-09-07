@@ -7,7 +7,7 @@ export default function sendError(error: any, res: Response) {
   const info = new ResponseInfo(message);
 
   switch (errorName) {
-    case 'BoxOpenError':
+    case 'CashboxError':
     case 'InvalidSignInError':
       code = 400;
       break;
