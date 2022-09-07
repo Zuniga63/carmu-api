@@ -321,6 +321,10 @@ export async function closeBox(req: Request, res: Response) {
 export async function listTransactions(req: Request, res: Response) {
   const { boxId } = req.params;
   try {
+    const cashbox = await CashboxModel.findById(boxId).select('name, openBox');
+    if (!cashbox) throw new NotFoundError('La caja no está registrada');
+    if (!cashbox.openBox) throw new CashboxError('La caja no está operativa.');
+
     const transactions = await CashboxTransactionModel.find({ cashbox: boxId }).sort('transactionDate');
     res.status(200).json({ transactions });
   } catch (error) {

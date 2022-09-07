@@ -280,8 +280,12 @@ router.route('/:boxId/close').put(controller.closeBox);
  *                  type: array
  *                  items:
  *                    $ref: '#/components/schemas/transaction'
+ *      400:
+ *        description: The box is not open.
  *      401:
  *        description: only auth users can acces the information
+ *      404:
+ *        description: The box not found.
  *    security:
  *      - bearerAuth: []
  */
