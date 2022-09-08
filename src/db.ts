@@ -9,7 +9,7 @@ mongoose.set('toObject', { virtuals: true });
 const connectionIsSuccessfully = (uri?: string): void => {
   if (process.env.APP_ENV === 'local' && uri) {
     const message = `Connection with mongoDB into url:${uri}`;
-    console.log(message, uri);
+    console.log(message);
   }
 };
 
