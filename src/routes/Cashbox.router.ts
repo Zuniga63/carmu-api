@@ -255,7 +255,7 @@ router.route('/:boxId/open').put(controller.openBox);
 router.route('/:boxId/close').put(controller.closeBox);
 /**
  * @openapi
- * /boxes/{:boxId}/transactions:
+ * /boxes/{boxId}/transactions:
  *  get:
  *    tags:
  *      - Boxes
@@ -292,7 +292,7 @@ router.route('/:boxId/close').put(controller.closeBox);
 router.route('/:boxId/transactions').get(controller.listTransactions);
 /**
  * @openapi
- * /boxes/{:boxId}/transactions:
+ * /boxes/{boxId}/transactions:
  *  post:
  *    tags:
  *      - Boxes
@@ -312,27 +312,83 @@ router.route('/:boxId/transactions').get(controller.listTransactions);
  *          schema:
  *            $ref: '#/components/schemas/newTransactionRequest'
  *    responses:
- *      '200':
- *        description: List of transaction.
+ *      200:
+ *        description: Transaction created
  *        content:
  *          application/json:
  *            schema:
  *              type: object
  *              properties:
- *                transactions:
- *                  type: array
- *                  items:
- *                    $ref: '#/components/schemas/transaction'
+ *                transaction:
+ *                  $ref: '#/components/schemas/transaction'
  *      400:
  *        description: The box is not open.
  *      401:
  *        description: only auth users can acces the information
  *      404:
  *        description: The box not found.
+ *      422:
+ *        description: Invalid Input
+ *        content:
+ *          application/json:
+ *            schema:
+ *              $ref: '#/components/schemas/validationError'
  *    security:
  *      - bearerAuth: []
  */
 router.route('/:boxId/transactions').post(controller.addTransaction);
+/**
+ * @openapi
+ * /boxes/{boxId}/transactions/{transactionId}:
+ *  put:
+ *    tags:
+ *      - Boxes
+ *    summary: Update transaction by ID
+ *    description: This end point update the transaction in data base
+ *    parameters:
+ *      - name: boxId
+ *        in: path
+ *        description: The id of box
+ *        required: true
+ *        schema:
+ *          type: string
+ *      - name: transactionId
+ *        in: path
+ *        description: The id of transaction to update
+ *        required: true
+ *        schema:
+ *          type: string
+ *    requestBody:
+ *      description: Add new box in the databe
+ *      content:
+ *        application/json:
+ *          schema:
+ *            $ref: '#/components/schemas/newTransactionRequest'
+ *    responses:
+ *      200:
+ *        description: Transaction updated
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                transaction:
+ *                  $ref: '#/components/schemas/transaction'
+ *      400:
+ *        description: The box is not open, the transaction is a transfer
+ *      401:
+ *        description: only auth users can acces the information
+ *      404:
+ *        description: The box or trnasaction not found.
+ *      422:
+ *        description: Invalid Input
+ *        content:
+ *          application/json:
+ *            schema:
+ *              $ref: '#/components/schemas/validationError'
+ *    security:
+ *      - bearerAuth: []
+ */
 router.route('/:boxId/transactions/:transactionId').put(controller.updateTransaction);
 router.route('/:boxId/transactions/:transactionId').delete(controller.destroyTransaction);
 

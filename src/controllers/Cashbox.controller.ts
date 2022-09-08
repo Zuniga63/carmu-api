@@ -337,7 +337,6 @@ export async function addTransaction(req: Request, res: Response) {
 
   try {
     const cashbox = await CashboxModel.findById(boxId).select('name openBox transactions');
-    console.log(cashbox);
     if (!cashbox) throw new NotFoundError('La caja no está registrada');
     if (!cashbox.openBox) throw new CashboxError('La caja no está operativa.');
 
@@ -364,10 +363,32 @@ export async function addTransaction(req: Request, res: Response) {
   }
 }
 
-export async function updateTransaction(_req: Request, res: Response) {
-  // const { boxid } = req.params;
+export async function updateTransaction(req: Request, res: Response) {
+  const { boxId, transactionId } = req.params;
+  const { date, description, amount } = req.body;
+
   try {
-    // TODO
+    const [cashbox, transaction] = await Promise.all([
+      CashboxModel.findById(boxId).select('openBox'),
+      CashboxTransactionModel.findById(transactionId),
+    ]);
+    if (!cashbox) throw new NotFoundError('La caja no está registrada');
+    if (!cashbox.openBox) throw new CashboxError('La caja no está operativa.');
+    if (!transaction) throw new NotFoundError('Transacción no encontrada');
+    if (transaction.isTransfer) throw new CashboxError('Las transferencias no pueden modificarse.');
+
+    let transactionDate = dayjs(transaction.transactionDate);
+    const openBox = dayjs(cashbox.openBox);
+    if (date && typeof date === 'string' && dayjs(date).isValid() && !dayjs(date).isBefore(openBox)) {
+      transactionDate = dayjs(date);
+    }
+
+    transaction.transactionDate = transactionDate.toDate();
+    if (description) transaction.description = description;
+    if (amount) transaction.amount = amount;
+    await transaction.save({ validateModifiedOnly: true });
+
+    res.status(200).json({ transaction });
   } catch (error) {
     sendError(error, res);
   }
