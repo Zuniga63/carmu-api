@@ -394,10 +394,24 @@ export async function updateTransaction(req: Request, res: Response) {
   }
 }
 
-export async function destroyTransaction(_req: Request, res: Response) {
-  // const { boxid } = req.params;
+export async function destroyTransaction(req: Request, res: Response) {
+  const { boxId, transactionId } = req.params;
   try {
-    // TODO
+    const [cashbox, transaction] = await Promise.all([
+      CashboxModel.findById(boxId).select('openBox transactions'),
+      CashboxTransactionModel.findById(transactionId),
+    ]);
+    if (!cashbox) throw new NotFoundError('La caja no está registrada');
+    if (!cashbox.openBox) throw new CashboxError('La caja no está operativa.');
+    if (!transaction) throw new NotFoundError('Transacción no encontrada');
+    if (transaction.isTransfer) throw new CashboxError('Las transferencias no pueden eliminarse');
+
+    // Delete ref in the cahbox
+    cashbox.transactions = cashbox.transactions.filter((tId) => !transaction._id.equals(tId));
+    // Save change
+    await Promise.all([cashbox.save({ validateBeforeSave: false }), transaction.remove()]);
+
+    res.status(200).json({ transaction });
   } catch (error) {
     sendError(error, res);
   }

@@ -390,6 +390,46 @@ router.route('/:boxId/transactions').post(controller.addTransaction);
  *      - bearerAuth: []
  */
 router.route('/:boxId/transactions/:transactionId').put(controller.updateTransaction);
+/**
+ * @openapi
+ * /boxes/{boxId}/transactions/{transactionId}:
+ *  delete:
+ *    tags:
+ *      - Boxes
+ *    summary: Delete transaction by ID
+ *    description: This end point transaction the transaction in data base
+ *    parameters:
+ *      - name: boxId
+ *        in: path
+ *        description: The id of box
+ *        required: true
+ *        schema:
+ *          type: string
+ *      - name: transactionId
+ *        in: path
+ *        description: The id of transaction to update
+ *        required: true
+ *        schema:
+ *          type: string
+ *    responses:
+ *      200:
+ *        description: Transaction deleted
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                transaction:
+ *                  $ref: '#/components/schemas/transaction'
+ *      400:
+ *        description: The box is not open, the transaction is a transfer
+ *      401:
+ *        description: only auth users can acces the information
+ *      404:
+ *        description: The box or trnasaction not found.
+ *    security:
+ *      - bearerAuth: []
+ */
 router.route('/:boxId/transactions/:transactionId').delete(controller.destroyTransaction);
 
 export default router;
