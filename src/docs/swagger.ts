@@ -27,6 +27,10 @@ const swaggerDefinition: OAS3Definition = {
       name: 'Boxes',
       description: 'All end points for admin boxes, closings and transactions',
     },
+    {
+      name: 'Main Box',
+      description: 'End points for admin all transaction and closures',
+    },
   ],
   components: {
     securitySchemes: {
@@ -580,6 +584,123 @@ const swaggerDefinition: OAS3Definition = {
           cashier: {
             type: 'string',
             example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9',
+          },
+          userName: {
+            type: 'string',
+            example: 'Administrador',
+          },
+          cashierName: {
+            type: 'string',
+            example: 'Cashier Name',
+          },
+          boxName: {
+            type: 'string',
+            example: 'Cashier Name',
+          },
+          opened: {
+            type: 'string',
+            format: 'date-time',
+          },
+          closingDate: {
+            type: 'string',
+            format: 'date-time',
+          },
+          base: {
+            type: 'number',
+            example: 100000,
+          },
+          incomes: {
+            type: 'number',
+            example: 100000,
+          },
+          expenses: {
+            type: 'number',
+            example: 50000,
+          },
+          cash: {
+            type: 'number',
+            example: 140000,
+          },
+          coin: {
+            type: 'object',
+          },
+          bills: {
+            type: 'object',
+          },
+          leftover: {
+            type: 'number',
+            example: 1000,
+          },
+          missing: {
+            type: 'number',
+            example: 10000,
+          },
+          observation: {
+            type: 'string',
+            example: 'This is a observation.',
+          },
+          transactions: {
+            type: 'array',
+            items: {
+              type: 'string',
+              example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9',
+            },
+          },
+          createdAt: {
+            type: 'string',
+            format: 'date-time',
+          },
+          updatedAt: {
+            type: 'string',
+            format: 'date-time',
+          },
+        },
+      },
+      closingRecordWithRef: {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'string',
+            example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9',
+          },
+          cashbox: {
+            type: 'object',
+            properties: {
+              id: {
+                type: 'string',
+                example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9',
+              },
+              name: {
+                type: 'string',
+                example: 'Cash box Name',
+              },
+            },
+          },
+          user: {
+            type: 'object',
+            properties: {
+              id: {
+                type: 'string',
+                example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9',
+              },
+              name: {
+                type: 'string',
+                example: 'User nname',
+              },
+            },
+          },
+          cashier: {
+            type: 'object',
+            properties: {
+              id: {
+                type: 'string',
+                example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9',
+              },
+              name: {
+                type: 'string',
+                example: 'Cashier name',
+              },
+            },
           },
           userName: {
             type: 'string',
