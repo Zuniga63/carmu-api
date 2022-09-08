@@ -4,7 +4,7 @@ import dayjs from 'dayjs';
 import CashboxModel from 'src/models/Cashbox.model';
 import CashboxTransactionModel from 'src/models/CashboxTransaction.model';
 import UserModel from 'src/models/User.model';
-import { CashboxHydrated, CashboxTransactionHydrated, IValidationErrors, UserModelHydrated } from 'src/types';
+import { CashboxHydrated, IValidationErrors, UserModelHydrated } from 'src/types';
 import AuthError from 'src/utils/errors/AuthError';
 import NotFoundError from 'src/utils/errors/NotFoundError';
 import ValidationError from 'src/utils/errors/ValidationError';
@@ -227,7 +227,7 @@ export async function closeBox(req: Request, res: Response) {
   let balance: number;
   let leftover: number | undefined;
   let missing: number | undefined;
-  const transactions: CashboxTransactionHydrated[] = [];
+  // const transactions: CashboxTransactionHydrated[] = [];
 
   try {
     // Validate cash value
@@ -247,19 +247,18 @@ export async function closeBox(req: Request, res: Response) {
     if (hasError) throw new ValidationError('Error de validación', errors);
 
     // Get the cashbox with transctions and cashier
-    const cashbox = await CashboxModel.findById(boxId)
-      .populate<{ transactions: CashboxTransactionHydrated[] }>('transactions')
-      .populate<{ cashier: UserModelHydrated | undefined | null }>('cashier');
+    const cashbox = await CashboxModel.findById(boxId).populate<{ cashier: UserModelHydrated | undefined | null }>(
+      'cashier',
+    );
     if (!cashbox) throw new NotFoundError('Caja no encontrada');
     if (!cashbox.openBox) throw new CashboxError('¡La caja no está abierta!');
 
     // Calculate the incomes and expenses
-    cashbox.transactions.forEach((transaction) => {
+    const transactions = await CashboxTransactionModel.find({ cashbox: cashbox._id });
+    transactions.forEach((transaction) => {
       transaction.cashbox = undefined;
       if (transaction.amount > 0) incomes += transaction.amount;
       else expenses += Math.abs(transaction.amount);
-
-      transactions.push(transaction);
     });
 
     // Calculate the balance of box, leftover and missing
@@ -332,10 +331,34 @@ export async function listTransactions(req: Request, res: Response) {
   }
 }
 
-export async function addTransaction(_req: Request, res: Response) {
-  // const { boxid } = req.params;
+export async function addTransaction(req: Request, res: Response) {
+  const { boxId } = req.params;
+  const { date, description, amount } = req.body;
+
   try {
-    // TODO
+    const cashbox = await CashboxModel.findById(boxId).select('name openBox transactions');
+    console.log(cashbox);
+    if (!cashbox) throw new NotFoundError('La caja no está registrada');
+    if (!cashbox.openBox) throw new CashboxError('La caja no está operativa.');
+
+    let transactionDate = dayjs();
+    const openBox = dayjs(cashbox.openBox);
+    if (date && typeof date === 'string' && dayjs(date).isValid() && !dayjs(date).isBefore(openBox)) {
+      transactionDate = dayjs(date);
+    }
+
+    const transaction = await CashboxTransactionModel.create({
+      cashbox: cashbox._id,
+      transactionDate,
+      description,
+      amount,
+    });
+    console.log(transaction);
+
+    cashbox.transactions.push(transaction._id);
+    await cashbox.save({ validateBeforeSave: false });
+
+    res.status(201).json({ transaction });
   } catch (error) {
     sendError(error, res);
   }

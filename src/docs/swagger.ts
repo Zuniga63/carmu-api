@@ -710,6 +710,24 @@ const swaggerDefinition: OAS3Definition = {
           },
         },
       },
+      newTransactionRequest: {
+        type: 'object',
+        required: ['description', 'amount'],
+        properties: {
+          date: {
+            type: 'string',
+            format: 'date-time',
+          },
+          description: {
+            type: 'string',
+            example: 'This is a required description to transaction',
+          },
+          amount: {
+            type: 'number',
+            example: 100000,
+          },
+        },
+      },
     },
   },
 };

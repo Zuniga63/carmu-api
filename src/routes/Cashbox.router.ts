@@ -290,6 +290,48 @@ router.route('/:boxId/close').put(controller.closeBox);
  *      - bearerAuth: []
  */
 router.route('/:boxId/transactions').get(controller.listTransactions);
+/**
+ * @openapi
+ * /boxes/{:boxId}/transactions:
+ *  post:
+ *    tags:
+ *      - Boxes
+ *    summary: Add new transaction in the open box
+ *    description: This end point add a new transaction in the box
+ *    parameters:
+ *      - name: boxId
+ *        in: path
+ *        description: The id of box
+ *        required: true
+ *        schema:
+ *          type: string
+ *    requestBody:
+ *      description: Add new box in the databe
+ *      content:
+ *        application/json:
+ *          schema:
+ *            $ref: '#/components/schemas/newTransactionRequest'
+ *    responses:
+ *      '200':
+ *        description: List of transaction.
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                transactions:
+ *                  type: array
+ *                  items:
+ *                    $ref: '#/components/schemas/transaction'
+ *      400:
+ *        description: The box is not open.
+ *      401:
+ *        description: only auth users can acces the information
+ *      404:
+ *        description: The box not found.
+ *    security:
+ *      - bearerAuth: []
+ */
 router.route('/:boxId/transactions').post(controller.addTransaction);
 router.route('/:boxId/transactions/:transactionId').put(controller.updateTransaction);
 router.route('/:boxId/transactions/:transactionId').delete(controller.destroyTransaction);
