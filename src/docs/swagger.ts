@@ -417,6 +417,10 @@ const swaggerDefinition: OAS3Definition = {
             type: 'number',
             example: 100000,
           },
+          balance: {
+            type: 'number',
+            example: 100000,
+          },
           openBox: {
             type: 'string',
             format: 'date-time',
@@ -512,6 +516,10 @@ const swaggerDefinition: OAS3Definition = {
             example: 'Box name',
           },
           base: {
+            type: 'number',
+            example: 100000,
+          },
+          balance: {
             type: 'number',
             example: 100000,
           },

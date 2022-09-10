@@ -68,6 +68,7 @@ export interface ICashbox {
   name: string;
   cashierName?: string;
   base: number;
+  balance?: number;
   openBox?: Date;
   closed?: Date;
   transactions: Types.ObjectId[];
@@ -82,6 +83,12 @@ export interface ICashboxTransaction {
   description: string;
   isTransfer?: boolean;
   amount: number;
+}
+
+export interface IMainBox {
+  name: string;
+  balance: number;
+  transactions?: ICashboxTransaction[];
 }
 
 export type CashboxTransactionHydrated = HydratedDocument<ICashboxTransaction>;

@@ -4,7 +4,7 @@ import dayjs from 'dayjs';
 import CashboxModel from 'src/models/Cashbox.model';
 import CashboxTransactionModel from 'src/models/CashboxTransaction.model';
 import UserModel from 'src/models/User.model';
-import { CashboxHydrated, IValidationErrors, UserModelHydrated } from 'src/types';
+import { CashboxHydrated, IValidationErrors, IMainBox, UserModelHydrated } from 'src/types';
 import AuthError from 'src/utils/errors/AuthError';
 import NotFoundError from 'src/utils/errors/NotFoundError';
 import ValidationError from 'src/utils/errors/ValidationError';
@@ -16,11 +16,13 @@ export async function list(req: Request, res: Response) {
   const { user } = req;
   const boxSelect = '-transactions -closingRecords';
   let boxes: CashboxHydrated[] = [];
+  let mainBox: IMainBox | undefined;
 
   try {
     // * If the user is admin can view all boxes
     if (user && user?.role === 'admin') {
-      boxes = await CashboxModel.find().sort('name').select(boxSelect).populate('cashier', 'name');
+      boxes = await CashboxModel.find().sort('name').select(boxSelect).populate('cashier', 'name').lean();
+      mainBox = { name: 'Caja Global', balance: 0 };
     } else if (user) {
       const userWithBoxes = await user.populate<{ boxes: CashboxHydrated[] }>({
         path: 'boxes',
@@ -33,7 +35,19 @@ export async function list(req: Request, res: Response) {
 
       boxes = userWithBoxes.boxes;
     }
-    res.status(200).json({ boxes });
+
+    // Sum amount transaction of all boxes
+    const sums = await CashboxTransactionModel.aggregate([
+      { $group: { _id: '$cashbox', amount: { $sum: '$amount' } } },
+    ]);
+
+    sums.forEach((sum) => {
+      const box = boxes.find((boxModel) => boxModel._id.equals(sum._id));
+      if (box && box.openBox) box.balance = box.base + sum.amount;
+      else if (mainBox && sum._id === null) mainBox.balance += sum.amount;
+    });
+
+    res.status(200).json({ boxes, mainBox });
   } catch (error) {
     sendError(error, res);
   }
