@@ -21,7 +21,7 @@ export async function list(req: Request, res: Response) {
   try {
     // * If the user is admin can view all boxes
     if (user && user?.role === 'admin') {
-      boxes = await CashboxModel.find().sort('name').select(boxSelect).populate('cashier', 'name').lean();
+      boxes = await CashboxModel.find().sort('name').select(boxSelect).populate('cashier', 'name');
       mainBox = { name: 'Caja Global', balance: 0 };
     } else if (user) {
       const userWithBoxes = await user.populate<{ boxes: CashboxHydrated[] }>({
@@ -41,13 +41,16 @@ export async function list(req: Request, res: Response) {
       { $group: { _id: '$cashbox', amount: { $sum: '$amount' } } },
     ]);
 
+    // Covert each box model to Object
+    const result = boxes.map((box) => box.toObject());
+
     sums.forEach((sum) => {
-      const box = boxes.find((boxModel) => boxModel._id.equals(sum._id));
+      const box = result.find((boxModel) => boxModel._id.equals(sum._id));
       if (box && box.openBox) box.balance = box.base + sum.amount;
       else if (mainBox && sum._id === null) mainBox.balance += sum.amount;
     });
 
-    res.status(200).json({ boxes, mainBox });
+    res.status(200).json({ boxes: result, mainBox });
   } catch (error) {
     sendError(error, res);
   }
