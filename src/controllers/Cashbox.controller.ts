@@ -170,7 +170,8 @@ export async function destroy(req: Request, res: Response) {
 
 export async function openBox(req: Request, res: Response) {
   const { boxId } = req.params;
-  const { cashierId, base } = req.body;
+  const { base } = req.body;
+  let { cashierId } = req.body;
   const errors: IValidationErrors = {};
   let hasError = false;
 
@@ -190,6 +191,8 @@ export async function openBox(req: Request, res: Response) {
         errors.cashierId = { name: 'cashierId', message: 'El ID del cajero es invalido.' };
         hasError = true;
       }
+    } else if (req.user) {
+      cashierId = req.user.id;
     } else {
       errors.cashierId = { name: 'cashierId', message: 'Se requiere un cajero para abrir la caja.' };
       hasError = true;
