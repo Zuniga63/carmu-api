@@ -46,6 +46,7 @@
     "busboy": "^1.6.0",
     "cloudinary": "^1.30.1",
     "cors": "^2.8.5",
+    "dayjs": "^1.11.5",
     "dotenv": "^16.0.1",
     "express": "^4.18.1",
     "jsonwebtoken": "^8.5.1",

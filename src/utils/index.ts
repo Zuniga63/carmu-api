@@ -1,7 +1,38 @@
 import jwt from 'jsonwebtoken';
+import { UserModelHydrated } from 'src/types';
 
 export const emailRegex = /^[^@]+@[^@]+.[^@]+$/;
 export const strongPass = /(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^A-Za-z0-9])(?=.{8,})/;
+
+export enum Months {
+  'Enero' = 1,
+  'Febrero',
+  'Marzo',
+  'Abril',
+  'Mayo',
+  'Junio',
+  'Julio',
+  'Agosto',
+  'Septiembre',
+  'Octubre',
+  'Noviembre',
+  'Diciembre',
+}
+
+export enum ShortMonths {
+  'Ene' = 1,
+  'Feb',
+  'Mar',
+  'Abr',
+  'May',
+  'Jun',
+  'Jul',
+  'Ago',
+  'Sep',
+  'Oct',
+  'Nov',
+  'Dic',
+}
 
 /**
  * Normaliza el texto, cambia los espacios por (-) ademas de eliminar
@@ -26,8 +57,18 @@ export const createSlug = (text: string): string => {
  * @param duration Life of token in seconds by defaul is one day
  * @returns
  */
-export default function createToken(payload: object, duration?: number): string {
+export function createToken(payload: object, duration?: number): string {
   const secretKey: string = process.env.JWT_SECRET_KEY || 'secretKey';
-  const expiresIn: number = duration || 60 * 60 * 24;
+  const expiresIn: number = duration || 60 * 60 * 24 * 30;
   return jwt.sign(payload, secretKey, { expiresIn });
 }
+
+// -------------------------------------------------------------------------------------------------------------------
+// UTILS FOR ATUH
+// -------------------------------------------------------------------------------------------------------------------
+export const getLiteUserData = (user: UserModelHydrated) => ({
+  name: user.name,
+  email: user.email,
+  profilePhoto: user.profilePhoto,
+  role: user.role,
+});

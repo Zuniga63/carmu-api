@@ -19,7 +19,7 @@ app.use(express.json());
 app.use(cors());
 app.use(morgan('dev'));
 app.use('/', routes);
-app.use('/documentation', swaggerUi.serve, swaggerUi.setup(swaggerSetup));
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSetup));
 
 app.set('port', process.env.PORT || process.env.APP_PORT || '8080');
 app.set('env', process.env.APP_ENV || 'local');

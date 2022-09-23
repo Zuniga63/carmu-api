@@ -10,7 +10,7 @@ const router = Router();
  *  get:
  *    tags:
  *      - Category
- *    sumary: "Get all categories sort by name"
+ *    summary: "Get all categories sort by name"
  *    description: This end point Get all categories sort by name
  *    responses:
  *      '200':
@@ -37,7 +37,7 @@ router.route('/').get(controller.list);
  *  post:
  *    tags:
  *      - Category
- *    sumary: Register new category
+ *    summary: Register new category
  *    description: This end point register a new category in local database
  *    requestBody:
  *      content:
@@ -73,7 +73,7 @@ router.route('/').post(formData, controller.store);
  *  get:
  *    tags:
  *      - Category
- *    sumary: Register new category
+ *    summary: Register new category
  *    description: This end point register a new category in local database
  *    parameters:
  *      - name: categoryId
@@ -105,7 +105,7 @@ router.route('/:categoryId').get(controller.show);
  *  put:
  *    tags:
  *      - Category
- *    sumary: Update a category by id
+ *    summary: Update a category by id
  *    description: This end point update the information of category and sort other categories
  *    requestBody:
  *      content:
@@ -142,7 +142,7 @@ router.route('/:categoryId').put(formData, controller.update);
  *  delete:
  *    tags:
  *      - Category
- *    sumary: delete one category of database
+ *    summary: delete one category of database
  *    description: This end point delete a category of database and update the order of other categories.
  *    parameters:
  *      - name: categoryId
@@ -174,7 +174,7 @@ router.route('/:categoryId').delete(controller.destroy);
  *  post:
  *    tags:
  *      - Category
- *    sumary: Store the new order of categories
+ *    summary: Store the new order of categories
  *    description: This end point store the new order of categories.
  *    requestBody:
  *      content:

@@ -45,6 +45,7 @@ const schema = new Schema<IUserModel, Model<IUserModel>>(
     },
     employee: { type: Schema.Types.ObjectId, ref: 'Employee' },
     customer: { type: Schema.Types.ObjectId, ref: 'Customer' },
+    boxes: [{ type: Schema.Types.ObjectId, ref: 'Cashbox' }],
   },
   { timestamps: true },
 );

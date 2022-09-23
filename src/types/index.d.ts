@@ -28,6 +28,7 @@ export interface IUserModel {
   role?: UserRole;
   employee?: Types.ObjectId;
   customer?: Types.ObjectId;
+  boxes: Types.ObjectId[];
 }
 
 export type UserModelHydrated = HydratedDocument<IUserModel>;
@@ -55,4 +56,81 @@ export type StoreCategoryRequest = Pick<ICategory, 'name' | 'description' | 'ima
 export interface UpdateCategoryRequest extends Pick<ICategory, 'name' | 'description' | 'image'> {
   isEnabled?: string;
   order?: string;
+}
+
+// ----------------------------------------------------------------------------
+// CASHBOX
+// ----------------------------------------------------------------------------
+
+export interface ICashbox {
+  cashier?: Types.ObjectId;
+  users: Types.ObjectId[];
+  name: string;
+  cashierName?: string;
+  base: number;
+  balance?: number;
+  openBox?: Date;
+  closed?: Date;
+  transactions: Types.ObjectId[];
+  closingRecords: Types.ObjectId[];
+}
+
+export type CashboxHydrated = HydratedDocument<ICashbox>;
+
+export interface ICashboxTransaction {
+  cashbox?: Types.ObjectId;
+  transactionDate: Date;
+  description: string;
+  isTransfer?: boolean;
+  amount: number;
+}
+
+export interface IMainBox {
+  name: string;
+  balance: number;
+  transactions?: ICashboxTransaction[];
+}
+
+export type CashboxTransactionHydrated = HydratedDocument<ICashboxTransaction>;
+
+export interface IMonetaryValue {
+  denomination: string;
+  value: number;
+  count: number;
+}
+
+export interface ICashClosingRecord {
+  cashbox?: Types.ObjectId;
+  user?: Types.ObjectId;
+  cashier?: Types.ObjectId;
+  userName?: string;
+  cashierName?: string;
+  boxName?: string;
+  opened: Date;
+  closingDate: Date;
+  base: number;
+  incomes?: number;
+  expenses?: number;
+  cash: number;
+  coins?: IMonetaryValue[];
+  bills?: IMonetaryValue[];
+  leftover?: number;
+  missing?: number;
+  observation?: string;
+  transactions: Types.ObjectId[];
+}
+
+export type CashClosingRecordHydrated = HydratedDocument<ICashClosingRecord>;
+
+// ----------------------------------------------------------------------------
+// VALIDATIONS
+// ----------------------------------------------------------------------------
+export interface IValidationErrors {
+  [key: string]: {
+    name: string;
+    message: string;
+    kind?: string;
+    path?: string;
+    value?: string;
+  };
 }

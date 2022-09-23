@@ -1,6 +1,8 @@
 import { Router } from 'express';
 import { isAuthenticated, signin, signup } from 'src/controllers/Auth.controller';
 import userAuth from 'src/middleware/UserAuth';
+import * as userController from 'src/controllers/User.controller';
+import adminAuth from 'src/middleware/AdminAuth';
 
 const router = Router();
 
@@ -11,7 +13,7 @@ const router = Router();
  *  post:
  *    tags:
  *      - Auth
- *    sumary: "Register new user"
+ *    summary: "Register new user"
  *    description: This end point register a new user in local database
  *    requestBody:
  *      content:
@@ -44,7 +46,7 @@ router.route('/local/signup').post(signup);
  *  post:
  *    tags:
  *      - Auth
- *    sumary: "Login the user with token"
+ *    summary: "Login the user with token"
  *    description: This end point create a token for auth platform
  *    requestBody:
  *      content:
@@ -63,7 +65,6 @@ router.route('/local/signup').post(signup);
  *        description: Credenciales invalidas
  */
 router.route('/local/signin').post(signin);
-
 /**
  * Get all categories sort by name
  * @openapi
@@ -71,7 +72,7 @@ router.route('/local/signin').post(signin);
  *  get:
  *    tags:
  *      - Auth
- *    sumary: Get basic user data if the user is authenticated
+ *    summary: Get basic user data if the user is authenticated
  *    description: Get basic user data if the user is authenticated
  *    responses:
  *      '200':
@@ -92,5 +93,36 @@ router.route('/local/signin').post(signin);
  *      - bearerAuth: []
  */
 router.route('/local/is-authenticated').get(userAuth, isAuthenticated);
+
+// --------------------------------------------------------------------------------------------------------------------
+// ROUTES FOR ADMIN USERS
+// --------------------------------------------------------------------------------------------------------------------
+/**
+ * @openapi
+ * /auth/local/users:
+ *  get:
+ *    tags:
+ *      - Auth
+ *    summary: List of all users
+ *    description: This end point return a list of all user register en the databse
+ *    responses:
+ *      200:
+ *        description: List of all users sort by name
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                users:
+ *                  type: array
+ *                  items:
+ *                    $ref: '#/components/schemas/user'
+ *      401:
+ *        description: only admin users can acces this information
+ *    security:
+ *      - bearerAuth: []
+ *
+ */
+router.route('/local/users').get(adminAuth, userController.list);
 
 export default router;
