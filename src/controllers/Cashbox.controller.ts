@@ -41,8 +41,12 @@ export async function list(req: Request, res: Response) {
       { $group: { _id: '$cashbox', amount: { $sum: '$amount' } } },
     ]);
 
-    // Covert each box model to Object
-    const result = boxes.map((box) => box.toObject());
+    // Covert each box model to Plai-old-javascript-objetc and add balance to openbox
+    const result = boxes.map((box) => {
+      const leanBox = box.toObject();
+      if (box.openBox) leanBox.balance = box.base;
+      return leanBox;
+    });
 
     sums.forEach((sum) => {
       const box = result.find((boxModel) => boxModel._id.equals(sum._id));
@@ -73,7 +77,7 @@ export async function store(req: Request, res: Response) {
       const currentUserExist = IDs.some((userId) => currentUser._id.equals(userId));
       if (!currentUserExist) IDs.push(currentUser.id);
 
-      // Update ecah user
+      // Update each user
       const users = (await Promise.all(IDs.map((userId) => UserModel.findById(userId)))).filter((item) => !!item);
       users.forEach((user) => {
         if (user) {
@@ -186,17 +190,16 @@ export async function openBox(req: Request, res: Response) {
     }
 
     // Validate User Id
-    if (cashierId) {
-      if (!isValidObjectId(cashierId)) {
-        errors.cashierId = { name: 'cashierId', message: 'El ID del cajero es invalido.' };
-        hasError = true;
-      }
+    if (cashierId && !isValidObjectId(cashierId)) {
+      errors.cashierId = { name: 'cashierId', message: 'El ID del cajero es invalido.' };
+      hasError = true;
     } else if (req.user) {
       cashierId = req.user.id;
     } else {
       errors.cashierId = { name: 'cashierId', message: 'Se requiere un cajero para abrir la caja.' };
       hasError = true;
     }
+
     // Validate base
     if (base) {
       if (typeof base !== 'number') {
@@ -228,7 +231,8 @@ export async function openBox(req: Request, res: Response) {
     cashbox.base = base;
     cashbox.openBox = dayjs().toDate();
     cashbox.closed = undefined;
-    const cashboxSaved = await cashbox.save({ validateBeforeSave: false });
+    const cashboxSaved = (await cashbox.save({ validateBeforeSave: false })).toObject();
+    cashboxSaved.balance = base;
 
     res.status(200).json({ cashbox: cashboxSaved });
   } catch (error) {
@@ -247,11 +251,10 @@ export async function closeBox(req: Request, res: Response) {
   let balance: number;
   let leftover: number | undefined;
   let missing: number | undefined;
-  // const transactions: CashboxTransactionHydrated[] = [];
 
   try {
     // Validate cash value
-    if (cash) {
+    if (typeof cash !== 'undefined') {
       if (typeof cash !== 'number') {
         errors.cash = { name: 'cash', message: 'No tiene un formato válido.' };
         hasError = true;
@@ -372,7 +375,7 @@ export async function addTransaction(req: Request, res: Response) {
       description,
       amount,
     });
-    console.log(transaction);
+    console.log(date);
 
     cashbox.transactions.push(transaction._id);
     await cashbox.save({ validateBeforeSave: false });

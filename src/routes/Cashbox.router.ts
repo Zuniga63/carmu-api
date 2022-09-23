@@ -10,9 +10,9 @@ const router = Router();
  *    tags:
  *      - Boxes
  *    summary: Get all boxes sort by name
- *    description: This end point get the lite boxes sort by name in the database
+ *    description: This endpoint get the lite boxes sort by name in the database
  *    responses:
- *      '200':
+ *      200:
  *        description: List of boxes that actual user can see
  *        content:
  *          application/json:
