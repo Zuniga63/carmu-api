@@ -29,6 +29,7 @@ const router = Router();
  *      - bearerAuth: []
  */
 router.route('/transactions').get(controller.transactionList);
+router.route('/transactions').post(controller.addTransaction);
 /**
  * @openapi
  * /main-box/closing-list:
