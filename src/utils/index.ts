@@ -4,6 +4,36 @@ import { UserModelHydrated } from 'src/types';
 export const emailRegex = /^[^@]+@[^@]+.[^@]+$/;
 export const strongPass = /(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^A-Za-z0-9])(?=.{8,})/;
 
+export enum Months {
+  'Enero' = 1,
+  'Febrero',
+  'Marzo',
+  'Abril',
+  'Mayo',
+  'Junio',
+  'Julio',
+  'Agosto',
+  'Septiembre',
+  'Octubre',
+  'Noviembre',
+  'Diciembre',
+}
+
+export enum ShortMonths {
+  'Ene' = 1,
+  'Feb',
+  'Mar',
+  'Abr',
+  'May',
+  'Jun',
+  'Jul',
+  'Ago',
+  'Sep',
+  'Oct',
+  'Nov',
+  'Dic',
+}
+
 /**
  * Normaliza el texto, cambia los espacios por (-) ademas de eliminar
  * los signos de puntucacion.
