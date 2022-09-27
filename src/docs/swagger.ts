@@ -17,19 +17,23 @@ const swaggerDefinition: OAS3Definition = {
   tags: [
     {
       name: 'Auth',
-      description: 'All end point for register and auth',
+      description: 'All endpoint for register and auth',
     },
     {
       name: 'Category',
-      description: 'All end point for admin categories.',
+      description: 'All endpoint for admin categories.',
     },
     {
       name: 'Boxes',
-      description: 'All end points for admin boxes, closings and transactions',
+      description: 'All endpoints for admin boxes, closings and transactions',
     },
     {
       name: 'Main Box',
-      description: 'End points for admin all transaction and closures',
+      description: 'Endpoints for admin all transaction and closures',
+    },
+    {
+      name: 'Dashboard',
+      description: 'Endpoint for get statictics and metrics',
     },
   ],
   components: {
