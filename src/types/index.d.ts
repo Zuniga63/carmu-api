@@ -134,3 +134,33 @@ export interface IValidationErrors {
     value?: string;
   };
 }
+
+// ----------------------------------------------------------------------------
+// CUSTOMER
+// ----------------------------------------------------------------------------
+export interface ICustomerContact {
+  _id: Types.ObjectId;
+  phone: string;
+  description: string;
+}
+
+export type DocumentType = 'CC' | 'TI' | 'NIT' | 'PAP';
+
+export interface ICustomer {
+  user?: Types.ObjectId;
+  firstName: string;
+  lastName?: string;
+  alias?: string;
+  observation?: string;
+  email?: string;
+  contacts: ICustomerContact[];
+  address?: string;
+  documentType?: DocumentType;
+  documentNumber?: number;
+  birthDate?: Date;
+  profilePhoto?: IImage;
+}
+
+export type CustomerDocumentProps = {
+  contacts: Types.DocumentArray<ICustomerContact>;
+};
