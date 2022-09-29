@@ -1,6 +1,6 @@
 import { model, Model, models, Schema } from 'mongoose';
 import { CustomerDocumentProps, ICustomer, ICustomerContact } from 'src/types';
-import { emailRegex } from 'src/utils';
+import { emailRegex, removeNonNumericChars } from 'src/utils';
 
 type CustomerModelType = Model<ICustomer, {}, CustomerDocumentProps>;
 
@@ -57,7 +57,7 @@ const schema = new Schema<ICustomer, CustomerModelType>(
     address: String,
     documentType: {
       type: String,
-      default: 'CC',
+      enum: ['CC', 'TI', 'PAP', 'NIT'],
     },
     documentNumber: {
       type: String,
@@ -65,8 +65,11 @@ const schema = new Schema<ICustomer, CustomerModelType>(
         {
           async validator(value: string) {
             try {
-              const customer = await models.Customer.findOne({ documentNumber: value });
-              return !customer;
+              if (value) {
+                const customer = await models.Customer.findOne({ documentNumber: value });
+                return !customer;
+              }
+              return true;
             } catch (error) {
               return false;
             }
@@ -80,5 +83,19 @@ const schema = new Schema<ICustomer, CustomerModelType>(
   },
   { timestamps: true },
 );
+
+schema.pre('validate', function preSave(next) {
+  const customer = this;
+  if (this.documentNumber && (this.isModified('documentNumber') || this.isNew)) {
+    customer.documentNumber = removeNonNumericChars(this.documentNumber);
+  }
+  next();
+});
+
+schema.virtual('fullName').get(function () {
+  let fullName = this.firstName;
+  if (this.lastName) fullName = `${fullName} ${this.lastName}`;
+  return fullName;
+});
 
 export default model<ICustomer, CustomerModelType>('Customer', schema);

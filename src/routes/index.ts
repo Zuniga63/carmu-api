@@ -7,6 +7,7 @@ import CategoryRouter from './category.router';
 import CashboxRouter from './Cashbox.router';
 import MainBoxRouter from './MainBox.router';
 import DashboardRouter from './Dashboard.router';
+import CustomerRouter from './Customer.router';
 
 const rootRouter = Router();
 
@@ -15,5 +16,6 @@ rootRouter.use('/auth', AuthRouter);
 rootRouter.use('/categories', editorAuth, CategoryRouter);
 rootRouter.use('/boxes', userAuth, CashboxRouter);
 rootRouter.use('/main-box', adminAuth, MainBoxRouter);
+rootRouter.use('/customers', userAuth, CustomerRouter);
 
 export default rootRouter;

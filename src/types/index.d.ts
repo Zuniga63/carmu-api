@@ -144,6 +144,8 @@ export interface ICustomerContact {
   description: string;
 }
 
+export type CustomerContactLite = Omit<ICustomerContact, '_id'>;
+
 export type DocumentType = 'CC' | 'TI' | 'NIT' | 'PAP';
 
 export interface ICustomer {
@@ -156,7 +158,7 @@ export interface ICustomer {
   contacts: ICustomerContact[];
   address?: string;
   documentType?: DocumentType;
-  documentNumber?: number;
+  documentNumber?: string;
   birthDate?: Date;
   profilePhoto?: IImage;
 }
