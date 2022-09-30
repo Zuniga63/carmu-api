@@ -69,7 +69,7 @@ router.route('/').post(formData, controller.store);
 /**
  * Route for register new category
  * @openapi
- * /categories/:categoryId:
+ * /categories/{categoryId}:
  *  get:
  *    tags:
  *      - Category
@@ -101,7 +101,7 @@ router.route('/:categoryId').get(controller.show);
 /**
  * Route for register new category
  * @openapi
- * /categories/:categoryId:
+ * /categories/{categoryId}:
  *  put:
  *    tags:
  *      - Category
@@ -138,7 +138,7 @@ router.route('/:categoryId').put(formData, controller.update);
 /**
  * Route for register new category
  * @openapi
- * /categories/:categoryId:
+ * /categories/{categoryId}:
  *  delete:
  *    tags:
  *      - Category

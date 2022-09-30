@@ -166,3 +166,29 @@ export interface ICustomer {
 export type CustomerDocumentProps = {
   contacts: Types.DocumentArray<ICustomerContact>;
 };
+
+// ----------------------------------------------------------------------------
+// PRODUCTS
+// ----------------------------------------------------------------------------
+export interface IProduct {
+  categories: Types.ObjectId[];
+  tags: Types.ObjectId[];
+  colors: Types.ObjectId[];
+  sizes: Types.ObjectId[];
+  name: string;
+  slug: string;
+  description?: string;
+  image?: IImage;
+  images: Types.ObjectId[];
+  isInventoriable: boolean;
+  stock: number;
+  price: number;
+  hasDiscount: boolean;
+  priceWithDiscount?: number;
+  productIsNew: boolean;
+  published: boolean;
+  sold: number;
+  returned: number;
+}
+
+export type ProductHydrated = HydratedDocument<IProduct>;
