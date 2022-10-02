@@ -192,3 +192,62 @@ export interface IProduct {
 }
 
 export type ProductHydrated = HydratedDocument<IProduct>;
+
+// ----------------------------------------------------------------------------
+// PRODUCTS
+// ----------------------------------------------------------------------------
+export interface IInvoice {
+  seller?: Types.ObjectId;
+  customer?: Types.ObjectId;
+  isSeparate: boolean;
+  prefix?: string;
+  number: number;
+  customerName: string;
+  customerAddress?: string;
+  customerPhone?: number;
+  customerDocument?: string;
+  customerDocumentType?: string;
+  sellerName: string;
+  expeditionDate: Date;
+  expirationDate: Date;
+  invoiceItems: Types.ObjectId[];
+  subtotal?: number;
+  discount?: number;
+  amount: number;
+  cash?: number;
+  credit?: number;
+  cashChange?: number;
+  balance?: number;
+  cancel: boolean;
+  cancelMessage?: string;
+}
+
+export interface IInvoiceItem {
+  invoice: Types.ObjectId;
+  categories: Types.ObjectId[];
+  product?: Types.ObjectId;
+  productSize?: Types.ObjectId;
+  productColor?: Types.ObjectId;
+  tags: Types.ObjectId[];
+  isSeparate: boolean;
+  description: string;
+  quantity: number;
+  unitValue: number;
+  discount?: number;
+  amount: number;
+  balance?: number;
+  cancel: boolean;
+  cancelMessage?: string;
+}
+
+export interface IInvoicePayment {
+  invoice: Types.ObjectId;
+  customer?: Types.ObjectId;
+  isSeparate: boolean;
+  paymentDate: Date;
+  description?: string;
+  amount: number;
+  initialPayment: boolean;
+  cancel: boolean;
+  cancelMessage?: string;
+}
