@@ -196,6 +196,31 @@ export type ProductHydrated = HydratedDocument<IProduct>;
 // ----------------------------------------------------------------------------
 // PRODUCTS
 // ----------------------------------------------------------------------------
+export interface IInvoiceItem {
+  categories: Types.ObjectId[];
+  product?: Types.ObjectId;
+  productSize?: Types.ObjectId;
+  productColor?: Types.ObjectId;
+  tags: Types.ObjectId[];
+  description: string;
+  quantity: number;
+  unitValue: number;
+  discount?: number;
+  amount: number;
+  balance?: number;
+  cancel: boolean;
+  cancelMessage?: string;
+}
+
+export interface IInvoicePayment {
+  paymentDate: Date;
+  description?: string;
+  amount: number;
+  initialPayment: boolean;
+  cancel: boolean;
+  cancelMessage?: string;
+}
+
 export interface IInvoice {
   seller?: Types.ObjectId;
   customer?: Types.ObjectId;
@@ -210,7 +235,7 @@ export interface IInvoice {
   sellerName: string;
   expeditionDate: Date;
   expirationDate: Date;
-  invoiceItems: Types.ObjectId[];
+  items: IInvoiceItem[];
   subtotal?: number;
   discount?: number;
   amount: number;
@@ -218,36 +243,12 @@ export interface IInvoice {
   credit?: number;
   cashChange?: number;
   balance?: number;
+  payments: IInvoicePayment[];
   cancel: boolean;
   cancelMessage?: string;
 }
 
-export interface IInvoiceItem {
-  invoice: Types.ObjectId;
-  categories: Types.ObjectId[];
-  product?: Types.ObjectId;
-  productSize?: Types.ObjectId;
-  productColor?: Types.ObjectId;
-  tags: Types.ObjectId[];
-  isSeparate: boolean;
-  description: string;
-  quantity: number;
-  unitValue: number;
-  discount?: number;
-  amount: number;
-  balance?: number;
-  cancel: boolean;
-  cancelMessage?: string;
-}
-
-export interface IInvoicePayment {
-  invoice: Types.ObjectId;
-  customer?: Types.ObjectId;
-  isSeparate: boolean;
-  paymentDate: Date;
-  description?: string;
-  amount: number;
-  initialPayment: boolean;
-  cancel: boolean;
-  cancelMessage?: string;
-}
+export type InvoiceDocumentProps = {
+  items: Types.DocumentArray<IInvoiceItem>;
+  payments: Types.DocumentArray<IInvoicePayment>;
+};
