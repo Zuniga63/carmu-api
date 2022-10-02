@@ -161,6 +161,7 @@ export interface ICustomer {
   documentNumber?: string;
   birthDate?: Date;
   profilePhoto?: IImage;
+  invoices: Types.ObjectId[];
 }
 
 export type CustomerDocumentProps = {

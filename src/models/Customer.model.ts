@@ -80,6 +80,7 @@ const schema = new Schema<ICustomer, CustomerModelType>(
     },
     birthDate: Date,
     profilePhoto: Object,
+    invoices: [{ type: Schema.Types.ObjectId, ref: 'Invoice' }],
   },
   { timestamps: true },
 );
@@ -93,7 +94,7 @@ schema.pre('validate', function preSave(next) {
 });
 
 schema.virtual('fullName').get(function () {
-  let fullName = this.firstName;
+  let fullName: string = this.firstName;
   if (this.lastName) fullName = `${fullName} ${this.lastName}`;
   return fullName;
 });
