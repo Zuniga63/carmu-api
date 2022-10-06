@@ -2,6 +2,7 @@ import { Reference, Schema } from 'swagger-jsdoc';
 import cashboxSchema from './cashbox.schema';
 import customerSchema from './customer.schema';
 import productSchema from './product.schema';
+import invoiceSchema from './invoice.schema';
 
 const schemas: {
   [key: string]: Reference | Schema;
@@ -344,6 +345,7 @@ const schemas: {
   ...cashboxSchema,
   ...customerSchema,
   ...productSchema,
+  ...invoiceSchema,
 };
 
 export default schemas;

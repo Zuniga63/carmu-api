@@ -29,6 +29,10 @@ const tags: Tag[] = [
     name: 'Products',
     description: 'Endpoints for admin products',
   },
+  {
+    name: 'Invoices',
+    description: 'Endpoint for admin invoices',
+  },
 ];
 
 export default tags;

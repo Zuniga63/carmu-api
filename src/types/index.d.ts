@@ -162,11 +162,14 @@ export interface ICustomer {
   birthDate?: Date;
   profilePhoto?: IImage;
   invoices: Types.ObjectId[];
+  fullName: string;
 }
 
 export type CustomerDocumentProps = {
   contacts: Types.DocumentArray<ICustomerContact>;
 };
+
+export type HydratedCustomer = HydratedDocument<ICustomer & CustomerDocumentProps>;
 
 // ----------------------------------------------------------------------------
 // PRODUCTS
@@ -195,7 +198,7 @@ export interface IProduct {
 export type ProductHydrated = HydratedDocument<IProduct>;
 
 // ----------------------------------------------------------------------------
-// PRODUCTS
+// INVOICE
 // ----------------------------------------------------------------------------
 export interface IInvoiceItem {
   categories: Types.ObjectId[];
@@ -217,8 +220,8 @@ export interface IInvoicePayment {
   paymentDate: Date;
   description?: string;
   amount: number;
-  initialPayment: boolean;
-  cancel: boolean;
+  initialPayment?: boolean;
+  cancel?: boolean;
   cancelMessage?: string;
 }
 
@@ -227,17 +230,18 @@ export interface IInvoice {
   customer?: Types.ObjectId;
   isSeparate: boolean;
   prefix?: string;
-  number: number;
+  number?: number;
+  prefixNumber: string;
   customerName: string;
   customerAddress?: string;
-  customerPhone?: number;
+  customerPhone?: string;
   customerDocument?: string;
   customerDocumentType?: string;
   sellerName: string;
   expeditionDate: Date;
   expirationDate: Date;
   items: IInvoiceItem[];
-  subtotal?: number;
+  subtotal: number;
   discount?: number;
   amount: number;
   cash?: number;
@@ -253,3 +257,15 @@ export type InvoiceDocumentProps = {
   items: Types.DocumentArray<IInvoiceItem>;
   payments: Types.DocumentArray<IInvoicePayment>;
 };
+
+export type InvoiceHydrated = HydratedDocument<IInvoice> & InvoiceDocumentProps;
+
+export interface ISaleOperation {
+  categories: Types.ObjectId[];
+  tags: Types.ObjectId[];
+  operationDate: Date;
+  operationType: 'sale' | 'purchase' | 'credit' | 'separate' | 'credit_payment' | 'separate_payment' | 'exchange';
+  amount: number;
+}
+
+export type HydratedSaleOperation = HydratedDocument<ISaleOperation>;

@@ -9,6 +9,7 @@ import MainBoxRouter from './MainBox.router';
 import DashboardRouter from './Dashboard.router';
 import CustomerRouter from './Customer.router';
 import ProductRouter from './Product.router';
+import InvoiceRouter from './Invoice.router';
 
 const rootRouter = Router();
 
@@ -19,5 +20,6 @@ rootRouter.use('/boxes', userAuth, CashboxRouter);
 rootRouter.use('/main-box', adminAuth, MainBoxRouter);
 rootRouter.use('/customers', userAuth, CustomerRouter);
 rootRouter.use('/products', ProductRouter);
+rootRouter.use('/invoices', InvoiceRouter);
 
 export default rootRouter;
