@@ -17,15 +17,51 @@ const schema = new Schema<IProduct, Model<IProduct>>(
         {
           async validator(value: string) {
             try {
-              const product = await models.Product.findOne({
-                name: value,
-              });
-              return !product;
+              return !(await models.Product.exists({ name: value }));
             } catch (error) {
               return false;
             }
           },
           message: 'Ya existe un producto con este nombre.',
+        },
+      ],
+    },
+    ref: {
+      type: String,
+      validate: [
+        {
+          async validator(value: string) {
+            if (value) {
+              try {
+                return !(await models.Product.exists({ ref: value }));
+              } catch (error) {
+                return false;
+              }
+            }
+
+            return true;
+          },
+          message: 'Ya existe un producto con esta referencia.',
+        },
+      ],
+    },
+    barcode: {
+      type: String,
+      validate: [
+        {
+          async validator(value: string) {
+            let barcodeExist = false;
+            if (value) {
+              try {
+                barcodeExist = Boolean(await models.Product.exists({ barcode: value }));
+              } catch (error) {
+                barcodeExist = true;
+              }
+            }
+
+            return !barcodeExist;
+          },
+          message: 'Ya existe un producto con este codigo.',
         },
       ],
     },

@@ -44,6 +44,14 @@ const schema: { [key: string]: Reference | Schema } = {
         type: 'string',
         example: 'amazing-product',
       },
+      ref: {
+        type: 'string',
+        example: 'amazing-product',
+      },
+      barcode: {
+        type: 'string',
+        example: 'amazing-product',
+      },
       description: {
         type: 'string',
         example: 'This is a optional description for this product.',
@@ -125,6 +133,14 @@ const schema: { [key: string]: Reference | Schema } = {
         type: 'string',
         example: 'Amazing Product',
       },
+      ref: {
+        type: 'string',
+        example: 'amazing-product',
+      },
+      barcode: {
+        type: 'string',
+        example: 'amazing-product',
+      },
       description: {
         type: 'string',
         example: 'This is a optional description for this product.',
@@ -176,6 +192,14 @@ const schema: { [key: string]: Reference | Schema } = {
       name: {
         type: 'string',
         example: 'Amazing Product',
+      },
+      ref: {
+        type: 'string',
+        example: 'amazing-product',
+      },
+      barcode: {
+        type: 'string',
+        example: 'amazing-product',
       },
       description: {
         type: 'string',

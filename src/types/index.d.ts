@@ -181,6 +181,8 @@ export interface IProduct {
   sizes: Types.ObjectId[];
   name: string;
   slug: string;
+  ref?: string;
+  barcode?: string;
   description?: string;
   image?: IImage;
   images: Types.ObjectId[];

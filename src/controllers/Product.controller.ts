@@ -94,6 +94,8 @@ export async function update(req: Request, res: Response) {
   const {
     categoryIds,
     name,
+    ref,
+    barcode,
     description,
     image,
     isInventoriable,
@@ -116,6 +118,8 @@ export async function update(req: Request, res: Response) {
     // Save the basic information
     // ------------------------------------------------------------------------
     product.name = name;
+    product.ref = ref;
+    product.barcode = barcode;
     product.description = description;
     product.isInventoriable = isInventoriable;
     product.price = price;
