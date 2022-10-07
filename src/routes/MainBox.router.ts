@@ -29,6 +29,45 @@ const router = Router();
  *      - bearerAuth: []
  */
 router.route('/transactions').get(controller.transactionList);
+/**
+ * @openapi
+ * /main-box/transactions:
+ *  post:
+ *    tags:
+ *      - Main Box
+ *    summary: Add new transaction in the global list of transactions
+ *    description: This end point add a new transaction in the box
+ *    requestBody:
+ *      description: Add new box in the databe
+ *      content:
+ *        application/json:
+ *          schema:
+ *            $ref: '#/components/schemas/newTransactionRequest'
+ *    responses:
+ *      200:
+ *        description: Transaction created
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                transaction:
+ *                  $ref: '#/components/schemas/transaction'
+ *      400:
+ *        description: The box is not open.
+ *      401:
+ *        description: only auth users can acces the information
+ *      404:
+ *        description: The box not found.
+ *      422:
+ *        description: Invalid Input
+ *        content:
+ *          application/json:
+ *            schema:
+ *              $ref: '#/components/schemas/validationError'
+ *    security:
+ *      - bearerAuth: []
+ */
 router.route('/transactions').post(controller.addTransaction);
 /**
  * @openapi

@@ -38,7 +38,7 @@ router.route('/').get(controller.list);
  *    tags:
  *      - Category
  *    summary: Register new category
- *    description: This end point register a new category in local database
+ *    description: This endpoint register a new category in local database
  *    requestBody:
  *      content:
  *        multipart/form-data:
@@ -69,12 +69,12 @@ router.route('/').post(formData, controller.store);
 /**
  * Route for register new category
  * @openapi
- * /categories/:categoryId:
+ * /categories/{categoryId}:
  *  get:
  *    tags:
  *      - Category
- *    summary: Register new category
- *    description: This end point register a new category in local database
+ *    summary: Get the category
+ *    description: This endpoint get the category of databaes with ID
  *    parameters:
  *      - name: categoryId
  *        in: path
@@ -101,12 +101,12 @@ router.route('/:categoryId').get(controller.show);
 /**
  * Route for register new category
  * @openapi
- * /categories/:categoryId:
+ * /categories/{categoryId}:
  *  put:
  *    tags:
  *      - Category
  *    summary: Update a category by id
- *    description: This end point update the information of category and sort other categories
+ *    description: This endpoint update the information of category and sort other categories
  *    requestBody:
  *      content:
  *        multipart/form-data:
@@ -138,12 +138,12 @@ router.route('/:categoryId').put(formData, controller.update);
 /**
  * Route for register new category
  * @openapi
- * /categories/:categoryId:
+ * /categories/{categoryId}:
  *  delete:
  *    tags:
  *      - Category
  *    summary: delete one category of database
- *    description: This end point delete a category of database and update the order of other categories.
+ *    description: This endpoint delete a category of database and update the order of other categories.
  *    parameters:
  *      - name: categoryId
  *        in: path

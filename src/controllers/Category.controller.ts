@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { destroyResource } from 'src/middleware/formData';
 import CategoryModel from 'src/models/Category.model';
-import { CategoryHydrated, StoreCategoryRequest, UpdateCategoryRequest } from 'src/types';
+import { CategoryHydrated, ProductHydrated, StoreCategoryRequest, UpdateCategoryRequest } from 'src/types';
 import NotFoundError from 'src/utils/errors/NotFoundError';
 import sendError from 'src/utils/sendError';
 
@@ -84,8 +84,19 @@ export async function destroy(req: Request, res: Response) {
   const { categoryId } = req.params;
 
   try {
-    const category = await CategoryModel.findByIdAndDelete(categoryId);
+    const category = await CategoryModel.findByIdAndDelete(categoryId).populate<{ products: ProductHydrated[] }>(
+      'products',
+      'categories',
+    );
     if (!category) throw new NotFoundError('Categoría no encontrada.');
+
+    // Remove ref in products
+    await Promise.all(
+      category.products.map((product) => {
+        product.categories = product.categories.filter((categoryId) => !categoryId.equals(category._id));
+        return product.save({ validateBeforeSave: false });
+      }),
+    );
 
     res.status(200).json({ category });
   } catch (error) {

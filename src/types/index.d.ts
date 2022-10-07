@@ -134,3 +134,140 @@ export interface IValidationErrors {
     value?: string;
   };
 }
+
+// ----------------------------------------------------------------------------
+// CUSTOMER
+// ----------------------------------------------------------------------------
+export interface ICustomerContact {
+  _id: Types.ObjectId;
+  phone: string;
+  description: string;
+}
+
+export type CustomerContactLite = Omit<ICustomerContact, '_id'>;
+
+export type DocumentType = 'CC' | 'TI' | 'NIT' | 'PAP';
+
+export interface ICustomer {
+  user?: Types.ObjectId;
+  firstName: string;
+  lastName?: string;
+  alias?: string;
+  observation?: string;
+  email?: string;
+  contacts: ICustomerContact[];
+  address?: string;
+  documentType?: DocumentType;
+  documentNumber?: string;
+  birthDate?: Date;
+  profilePhoto?: IImage;
+  invoices: Types.ObjectId[];
+  fullName: string;
+}
+
+export type CustomerDocumentProps = {
+  contacts: Types.DocumentArray<ICustomerContact>;
+};
+
+export type HydratedCustomer = HydratedDocument<ICustomer & CustomerDocumentProps>;
+
+// ----------------------------------------------------------------------------
+// PRODUCTS
+// ----------------------------------------------------------------------------
+export interface IProduct {
+  categories: Types.ObjectId[];
+  tags: Types.ObjectId[];
+  colors: Types.ObjectId[];
+  sizes: Types.ObjectId[];
+  name: string;
+  slug: string;
+  ref?: string;
+  barcode?: string;
+  description?: string;
+  image?: IImage;
+  images: Types.ObjectId[];
+  isInventoriable: boolean;
+  stock: number;
+  price: number;
+  hasDiscount: boolean;
+  priceWithDiscount?: number;
+  productIsNew: boolean;
+  published: boolean;
+  sold: number;
+  returned: number;
+}
+
+export type ProductHydrated = HydratedDocument<IProduct>;
+
+// ----------------------------------------------------------------------------
+// INVOICE
+// ----------------------------------------------------------------------------
+export interface IInvoiceItem {
+  categories: Types.ObjectId[];
+  product?: Types.ObjectId;
+  productSize?: Types.ObjectId;
+  productColor?: Types.ObjectId;
+  tags: Types.ObjectId[];
+  description: string;
+  quantity: number;
+  unitValue: number;
+  discount?: number;
+  amount: number;
+  balance?: number;
+  cancel: boolean;
+  cancelMessage?: string;
+}
+
+export interface IInvoicePayment {
+  paymentDate: Date;
+  description?: string;
+  amount: number;
+  initialPayment?: boolean;
+  cancel?: boolean;
+  cancelMessage?: string;
+}
+
+export interface IInvoice {
+  seller?: Types.ObjectId;
+  customer?: Types.ObjectId;
+  isSeparate: boolean;
+  prefix?: string;
+  number?: number;
+  prefixNumber: string;
+  customerName: string;
+  customerAddress?: string;
+  customerPhone?: string;
+  customerDocument?: string;
+  customerDocumentType?: string;
+  sellerName: string;
+  expeditionDate: Date;
+  expirationDate: Date;
+  items: IInvoiceItem[];
+  subtotal: number;
+  discount?: number;
+  amount: number;
+  cash?: number;
+  credit?: number;
+  cashChange?: number;
+  balance?: number;
+  payments: IInvoicePayment[];
+  cancel: boolean;
+  cancelMessage?: string;
+}
+
+export type InvoiceDocumentProps = {
+  items: Types.DocumentArray<IInvoiceItem>;
+  payments: Types.DocumentArray<IInvoicePayment>;
+};
+
+export type InvoiceHydrated = HydratedDocument<IInvoice> & InvoiceDocumentProps;
+
+export interface ISaleOperation {
+  categories: Types.ObjectId[];
+  tags: Types.ObjectId[];
+  operationDate: Date;
+  operationType: 'sale' | 'purchase' | 'credit' | 'separate' | 'credit_payment' | 'separate_payment' | 'exchange';
+  amount: number;
+}
+
+export type HydratedSaleOperation = HydratedDocument<ISaleOperation>;

@@ -63,6 +63,9 @@ export function createToken(payload: object, duration?: number): string {
   return jwt.sign(payload, secretKey, { expiresIn });
 }
 
+export const removeNonNumericChars = (value: any) => String(value).replace(/[^\d]/g, '');
+export const removeNonPhoneChars = (value: any) => String(value).replace(/[^+0-9]/g, '');
+
 // -------------------------------------------------------------------------------------------------------------------
 // UTILS FOR ATUH
 // -------------------------------------------------------------------------------------------------------------------
