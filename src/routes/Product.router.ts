@@ -1,6 +1,8 @@
 import { Router } from 'express';
 import * as controller from 'src/controllers/Product.controller';
+import adminAuth from 'src/middleware/AdminAuth';
 import formData from 'src/middleware/formData';
+import userAuth from 'src/middleware/UserAuth';
 
 const router = Router();
 
@@ -56,7 +58,7 @@ router.route('/').get(controller.list);
  *      - bearerAuth: []
  *
  */
-router.route('/').post(formData, controller.store);
+router.route('/').post(userAuth, formData, controller.store);
 /**
  * @openapi
  * /products/{productId}:
@@ -126,7 +128,7 @@ router.route('/:productId').get(controller.show);
  *      - bearerAuth: []
  *
  */
-router.route('/:productId').put(formData, controller.update);
+router.route('/:productId').put(userAuth, formData, controller.update);
 /**
  * @openapi
  * /products/{productId}:
@@ -158,6 +160,6 @@ router.route('/:productId').put(formData, controller.update);
  *      - bearerAuth: []
  *
  */
-router.route('/:productId').delete(controller.destroy);
+router.route('/:productId').delete(adminAuth, controller.destroy);
 
 export default router;
