@@ -20,6 +20,6 @@ rootRouter.use('/boxes', userAuth, CashboxRouter);
 rootRouter.use('/main-box', adminAuth, MainBoxRouter);
 rootRouter.use('/customers', userAuth, CustomerRouter);
 rootRouter.use('/products', ProductRouter);
-rootRouter.use('/invoices', InvoiceRouter);
+rootRouter.use('/invoices', userAuth, InvoiceRouter);
 
 export default rootRouter;

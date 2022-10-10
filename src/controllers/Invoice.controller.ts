@@ -20,15 +20,22 @@ import {
 import NotFoundError from 'src/utils/errors/NotFoundError';
 import sendError from 'src/utils/sendError';
 import ValidationError from 'src/utils/errors/ValidationError';
+import CategoryModel from 'src/models/Category.model';
+import ProductModel from 'src/models/Product.model';
 
 // ----------------------------------------------------------------------------
 // GET: /invoices
 // ----------------------------------------------------------------------------
 export async function list(_req: Request, res: Response) {
   try {
-    const invoices = await InvoiceModel.find({}).sort('expeditionDate').select('-items -payments');
-    const saleOperations = await SaleOperationModel.find({});
-    res.status(200).json({ invoices, saleOperations });
+    const [invoices, customers, categories, products] = await Promise.all([
+      InvoiceModel.find({}).sort('expeditionDate').select('-items -payments'),
+      CustomerModel.find({}).sort('firstName').sort('lastName'),
+      CategoryModel.find({}).where('mainCategory').equals(null).sort('name').select('mainCategory name'),
+      ProductModel.find({}).sort('name').select('name categories tags ref barcode'),
+    ]);
+
+    res.status(200).json({ invoices, customers, categories, products });
   } catch (error) {
     sendError(error, res);
   }

@@ -23,6 +23,41 @@ const router = Router();
  *                  type: array
  *                  items:
  *                    $ref: '#/components/schemas/invoice'
+ *                customers:
+ *                  type: array
+ *                  items:
+ *                    $ref: '#/components/schemas/customer'
+ *                categories:
+ *                  type: array
+ *                  items:
+ *                    type: object
+ *                    properties:
+ *                      id:
+ *                        type: string
+ *                      name:
+ *                        type: string
+ *                products:
+ *                  type: array
+ *                  items:
+ *                    type: object
+ *                    properties:
+ *                      id:
+ *                        type: string
+ *                      name:
+ *                        type: string
+ *                      categories:
+ *                        type: array
+ *                        items:
+ *                          type: string
+ *                      tags:
+ *                        type: array
+ *                        items:
+ *                          type: string
+ *                      ref:
+ *                        type: string
+ *                      barcode:
+ *                        type: string
+ *
  *      401:
  *        description: only auth users can acces the information
  *    security:
