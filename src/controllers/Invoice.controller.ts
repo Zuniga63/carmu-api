@@ -28,14 +28,18 @@ import ProductModel from 'src/models/Product.model';
 // ----------------------------------------------------------------------------
 export async function list(_req: Request, res: Response) {
   try {
-    const [invoices, customers, categories, products] = await Promise.all([
-      InvoiceModel.find({}).sort('expeditionDate').select('-items -payments'),
+    const [invoices, customers, categories, products, cashboxs] = await Promise.all([
+      InvoiceModel.find({})
+        .sort('expeditionDate')
+        .select('-items -payments')
+        .populate('customer', 'firstName lastName'),
       CustomerModel.find({}).sort('firstName').sort('lastName'),
       CategoryModel.find({}).where('mainCategory').equals(null).sort('name').select('mainCategory name'),
-      ProductModel.find({}).sort('name').select('name categories tags ref barcode'),
+      ProductModel.find({}).sort('name').select('-images -isInventoriable -sold -returned'),
+      CashboxModel.find({}).sort('name').where('openBox').ne(null).select('name openBox'),
     ]);
 
-    res.status(200).json({ invoices, customers, categories, products });
+    res.status(200).json({ invoices, customers, categories, products, cashboxs });
   } catch (error) {
     sendError(error, res);
   }
@@ -297,7 +301,7 @@ export async function store(req: Request, res: Response) {
 export async function show(req: Request, res: Response) {
   const { invoiceId } = req.params;
   try {
-    const invoice = await InvoiceModel.findById(invoiceId);
+    const invoice = await InvoiceModel.findById(invoiceId).populate('customer', 'firstName lastName');
     if (!invoice) throw new NotFoundError('Factura no encontrada.');
 
     res.status(200).json({ invoice });
