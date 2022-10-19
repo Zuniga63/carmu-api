@@ -13,8 +13,25 @@ const schema: { [key: string]: Reference | Schema } = {
         example: '6334705a7b25323cbbfbaffd',
       },
       customer: {
-        type: 'string',
-        example: '6334705a7b25323cbbfbaffd',
+        type: 'object',
+        properties: {
+          id: {
+            type: 'string',
+            example: '6334705a7b25323cbbfbaffd',
+          },
+          firstName: {
+            type: 'string',
+            example: 'Jhon',
+          },
+          lastName: {
+            type: 'string',
+            example: 'Doe',
+          },
+          fullName: {
+            type: 'string',
+            example: 'Jhon Doe',
+          },
+        },
       },
       isSeparate: {
         type: 'boolean',
