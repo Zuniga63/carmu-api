@@ -96,7 +96,10 @@ const invoiceSchema = new Schema<IInvoice, InvoiceModelType>(
       type: [itemSchema],
       minlength: [1, 'Se requiere almenos un item.'],
     },
-    subtotal: Number,
+    subtotal: {
+      type: Number,
+      default: 0,
+    },
     discount: Number,
     amount: { type: Number, default: 0 },
     cash: Number,
