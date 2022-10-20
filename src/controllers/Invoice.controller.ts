@@ -287,7 +287,9 @@ export async function store(req: Request, res: Response) {
       invoice.save(),
     ]);
 
-    res.status(201).json({ invoice });
+    const result = await invoice.populate('customer', 'firstName lastName');
+
+    res.status(201).json({ invoice: result });
   } catch (error) {
     sendError(error, res);
   }
