@@ -151,6 +151,8 @@ const buildCashPayments = (data: any, limit: number) => {
   });
 
   if (cashAvailable > limit) {
+    // ? For each payment reduce the remainder to zero
+    // ? after map all payments with zero amount are removed
     let remainder = limit;
     cashPayments = cashPayments
       .map((payment) => {
@@ -164,8 +166,6 @@ const buildCashPayments = (data: any, limit: number) => {
         return payment;
       })
       .filter((item) => item.amount > 0);
-
-    // Reduce the cash payments
   } else if (cashAvailable < limit) {
     // Add a new payment
     cashPayments.push({
@@ -194,6 +194,7 @@ const buildPaymentsAndTransactions = async (invoice: InvoiceHydrated, cashPaymen
       cashPayments.map(async (cashPayment) => {
         if (cashPayment.register) {
           let cashbox: CashboxHydrated | null = null;
+
           const transaction = new CashboxTransactionModel({
             transactionDate: invoice.expeditionDate,
             description: `Factura N° ${invoice.prefixNumber}: ${cashPayment.description}`,
@@ -241,11 +242,13 @@ const buildSaleOperations = (invoice: InvoiceHydrated) => {
     const { categories, tags, amount, balance } = item;
     const properties = { categories, tags, operationDate: invoice.expeditionDate };
 
-    if (balance) {
-      // register sale
-      const sale = amount - balance;
-      if (sale) saleOperations.push(new SaleOperationModel({ ...properties, amount: sale, operationType: 'sale' }));
+    const saleAmount = amount - (balance || 0);
+    if (saleAmount) {
+      const operation = new SaleOperationModel({ ...properties, amount: saleAmount, operationType: 'sale' });
+      saleOperations.push(operation);
+    }
 
+    if (balance) {
       // Register credit or separate
       saleOperations.push(
         new SaleOperationModel({
@@ -254,9 +257,6 @@ const buildSaleOperations = (invoice: InvoiceHydrated) => {
           operationType: invoice.isSeparate ? 'separate' : 'credit',
         }),
       );
-    } else {
-      // The item is complety pay
-      saleOperations.push(new SaleOperationModel({ ...properties, amount, operationType: 'sale' }));
     }
   });
 
@@ -279,8 +279,6 @@ export async function store(req: Request, res: Response) {
     const { payments, cashboxs, transactions } = await buildPaymentsAndTransactions(invoice, cashPayments);
     const saleOperations = buildSaleOperations(invoice);
     invoice.payments.push(...payments);
-
-    // if (isSeparate && invoice.balance) invoice.isSeparate = true;
 
     await Promise.all([
       ...cashboxs.map((c) => c.save({ validateBeforeSave: false })),
