@@ -84,7 +84,7 @@ const invoiceSchema = new Schema<IInvoice, InvoiceModelType>(
     isSeparate: { type: Boolean, default: false },
     prefix: String,
     number: Number,
-    customerName: { type: String, default: 'Cliente mostrador' },
+    customerName: { type: String, default: 'Mostrador' },
     customerAddress: String,
     customerPhone: String,
     customerDocument: String,
