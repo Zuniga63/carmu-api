@@ -287,7 +287,9 @@ export async function store(req: Request, res: Response) {
       invoice.save(),
     ]);
 
-    res.status(201).json({ invoice });
+    const result = await invoice.populate('customer', 'firstName lastName');
+
+    res.status(201).json({ invoice: result });
   } catch (error) {
     sendError(error, res);
   }
@@ -429,21 +431,24 @@ export async function addPayment(req: Request, res: Response) {
   const info: {
     items: IInvoiceItem[];
     payment: IInvoicePayment | undefined;
+    invoice: any | undefined;
     transaction: CashboxTransactionHydrated | undefined;
     saleOperations: HydratedSaleOperation[];
     message: string;
   } = {
     items: [],
     payment: undefined,
+    invoice: undefined,
     transaction: undefined,
     saleOperations: [],
     message: '¡La factura ya fue pagada!',
   };
 
   try {
-    const invoice = await InvoiceModel.findById(invoiceId)
-      .select('prefix number isSeparate customer customerName expeditionDate items balance payments')
-      .populate<{ customer: HydratedCustomer }>('customer', 'firstName lastName alias');
+    const invoice = await InvoiceModel.findById(invoiceId).populate<{ customer: HydratedCustomer }>(
+      'customer',
+      'firstName lastName alias',
+    );
     if (!invoice) throw new NotFoundError('Factura no encontrada.');
 
     if (invoice.balance) {
@@ -518,6 +523,7 @@ export async function addPayment(req: Request, res: Response) {
       ]);
 
       info.payment = invoice.payments.at(-1) as IInvoicePayment;
+      info.invoice = invoice;
       info.saleOperations = saleOperations;
     }
 
