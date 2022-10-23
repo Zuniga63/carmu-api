@@ -1,8 +1,13 @@
-import dayjs from 'dayjs';
+import dayjs, { Dayjs } from 'dayjs';
 import { Request, Response } from 'express';
 import CashboxTransactionModel from 'src/models/CashboxTransaction.model';
 import { ShortMonths } from 'src/utils';
 import sendError from 'src/utils/sendError';
+import SaleOperationModel from 'src/models/SaleOperation.model';
+import { CategoryHydrated, OperationType } from 'src/types';
+import AnnualReport from 'src/utils/reports/AnnualReport';
+
+const tz = 'America/Bogota';
 
 export const cashReport = async (_req: Request, res: Response) => {
   interface ICashGroupResult {
@@ -123,6 +128,36 @@ export const cashReport = async (_req: Request, res: Response) => {
     const reports = buildCashReport(result);
 
     res.status(200).json({ reports });
+  } catch (error) {
+    sendError(error, res);
+  }
+};
+
+const getOperationSales = async (from: Dayjs, to: Dayjs, type: OperationType) => {
+  const result = await SaleOperationModel.find({ operationDate: { $gte: from, $lt: to }, operationType: type })
+    .sort('operationDate')
+    .populate<{ categories: CategoryHydrated[] }>('categories', 'mainCategory name level subcategories');
+
+  return result;
+};
+
+export const saleReport = async (req: Request, res: Response) => {
+  const { year } = req.query;
+  try {
+    const now = dayjs().tz(tz);
+    let fromDate = now.startOf('year');
+    let toDate = now.endOf('year');
+
+    if (year && !isNaN(Number(year))) {
+      fromDate = fromDate.year(Number(year));
+      toDate = fromDate.endOf('year');
+      if (toDate.isAfter(now)) toDate = now.clone();
+    }
+
+    const operations = await getOperationSales(fromDate, toDate, 'sale');
+    const report = new AnnualReport(fromDate.year(), fromDate, toDate, operations);
+
+    res.status(200).json({ report });
   } catch (error) {
     sendError(error, res);
   }

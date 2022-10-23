@@ -24,4 +24,31 @@ const router = Router();
  */
 router.route('/cash-report').get(adminAuth, controller.cashReport);
 
+/**
+ * @openapi
+ * /dashboard/sale-report:
+ *  get:
+ *    tags:
+ *      - Dashboard
+ *    summary: Get the annual report of incomes and expenses
+ *    description: This endpoint get the current annual metrics for show incomes and expenses
+ *    parameters:
+ *      - name: year
+ *        in: query
+ *        description: Year of report
+ *        required: false
+ *        schema:
+ *          type: string
+ *    responses:
+ *      200:
+ *        description: Object with annual data
+ *      400:
+ *        description: The box is not open.
+ *      401:
+ *        description: only admin auth users can access to the information
+ *    security:
+ *      - bearerAuth: []
+ */
+router.route('/sale-report').get(controller.saleReport);
+
 export default router;

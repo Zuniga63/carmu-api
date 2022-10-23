@@ -262,12 +262,27 @@ export type InvoiceDocumentProps = {
 
 export type InvoiceHydrated = HydratedDocument<IInvoice> & InvoiceDocumentProps;
 
+export type OperationType =
+  | 'sale'
+  | 'purchase'
+  | 'credit'
+  | 'separate'
+  | 'credit_payment'
+  | 'separate_payment'
+  | 'exchange';
+
 export interface ISaleOperation {
   categories: Types.ObjectId[];
   tags: Types.ObjectId[];
   operationDate: Date;
-  operationType: 'sale' | 'purchase' | 'credit' | 'separate' | 'credit_payment' | 'separate_payment' | 'exchange';
+  operationType: OperationType;
   amount: number;
 }
 
 export type HydratedSaleOperation = HydratedDocument<ISaleOperation>;
+export type HydratedSaleOperationWithCategories = Omit<HydratedSaleOperation, 'categories'> & {
+  categories: CategoryHydrated[];
+};
+// --------------------------------------------------------------------------------------
+// REPORT
+// --------------------------------------------------------------------------------------
