@@ -1,4 +1,5 @@
 import dayjs, { Dayjs } from 'dayjs';
+import timezone from 'dayjs/plugin/timezone';
 import { Request, Response } from 'express';
 import CashboxTransactionModel from 'src/models/CashboxTransaction.model';
 import { ShortMonths } from 'src/utils';
@@ -7,6 +8,7 @@ import SaleOperationModel from 'src/models/SaleOperation.model';
 import { CategoryHydrated, OperationType } from 'src/types';
 import AnnualReport from 'src/utils/reports/AnnualReport';
 
+dayjs.extend(timezone);
 const tz = 'America/Bogota';
 
 export const cashReport = async (_req: Request, res: Response) => {
@@ -141,8 +143,16 @@ const getOperationSales = async (from: Dayjs, to: Dayjs, type: OperationType) =>
   return result;
 };
 
-export const saleReport = async (req: Request, res: Response) => {
-  const { year } = req.query;
+const isOperationType = (value: any): value is OperationType => {
+  const types = ['sale', 'purchase', 'credit', 'separate', 'credit_payment', 'separate_payment', 'exchange'];
+  return types.includes(value);
+};
+
+export const annualReport = async (req: Request, res: Response) => {
+  const { year, operation } = req.query;
+  const operationType: OperationType = isOperationType(operation) ? operation : 'sale';
+  console.log(operationType);
+
   try {
     const now = dayjs().tz(tz);
     let fromDate = now.startOf('year');
@@ -154,7 +164,7 @@ export const saleReport = async (req: Request, res: Response) => {
       if (toDate.isAfter(now)) toDate = now.clone();
     }
 
-    const operations = await getOperationSales(fromDate, toDate, 'sale');
+    const operations = await getOperationSales(fromDate, toDate, operationType);
     const report = new AnnualReport(fromDate.year(), fromDate, toDate, operations);
 
     res.status(200).json({ report });

@@ -26,7 +26,7 @@ router.route('/cash-report').get(adminAuth, controller.cashReport);
 
 /**
  * @openapi
- * /dashboard/sale-report:
+ * /dashboard/annual-report:
  *  get:
  *    tags:
  *      - Dashboard
@@ -36,6 +36,12 @@ router.route('/cash-report').get(adminAuth, controller.cashReport);
  *      - name: year
  *        in: query
  *        description: Year of report
+ *        required: false
+ *        schema:
+ *          type: string
+ *      - name: operation
+ *        in: query
+ *        description: Operation type for the report
  *        required: false
  *        schema:
  *          type: string
@@ -49,6 +55,6 @@ router.route('/cash-report').get(adminAuth, controller.cashReport);
  *    security:
  *      - bearerAuth: []
  */
-router.route('/sale-report').get(controller.saleReport);
+router.route('/annual-report').get(controller.annualReport);
 
 export default router;
