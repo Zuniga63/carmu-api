@@ -54,7 +54,7 @@ export async function store(req: Request, res: Response) {
 
   try {
     const categories = await getCategoryModels(categoryIds.split(','));
-    const stock = isInventoriable && isInventoriable === 'true' && initialStock ? initialStock : 0;
+    const stock = isInventoriable && initialStock ? initialStock : 0;
 
     const product = await ProductModel.create({
       ...req.body,
@@ -98,6 +98,7 @@ export async function update(req: Request, res: Response) {
     barcode,
     description,
     image,
+    stock,
     isInventoriable,
     price,
     hasDiscount,
@@ -121,10 +122,11 @@ export async function update(req: Request, res: Response) {
     product.ref = ref;
     product.barcode = barcode;
     product.description = description;
-    product.isInventoriable = isInventoriable;
     product.price = price;
     product.hasDiscount = hasDiscount;
     product.priceWithDiscount = priceWithDiscount;
+    product.stock = stock;
+    product.isInventoriable = isInventoriable;
     product.productIsNew = productIsNew;
     product.published = published;
 
