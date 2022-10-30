@@ -69,6 +69,33 @@ const schema: { [key: string]: Reference | Schema } = {
         type: 'string',
         format: 'date',
       },
+      fullName: {
+        type: 'string',
+        example: 'Jhon Doe',
+      },
+      balance: {
+        type: 'number',
+      },
+      firstPendingInvoice: {
+        type: 'string',
+        format: 'date-time',
+      },
+      lastPendingInvoice: {
+        type: 'string',
+        format: 'date-time',
+      },
+      lastPayment: {
+        type: 'string',
+        format: 'date-time',
+      },
+      createdAt: {
+        type: 'string',
+        format: 'date-time',
+      },
+      updatedAt: {
+        type: 'string',
+        format: 'date-time',
+      },
     },
   },
   customerList: {

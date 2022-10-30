@@ -163,6 +163,10 @@ export interface ICustomer {
   profilePhoto?: IImage;
   invoices: Types.ObjectId[];
   fullName: string;
+  balance?: number;
+  firstPendingInvoice?: Date;
+  lastPendingInvoice?: Date;
+  lastPayment?: Date;
 }
 
 export type CustomerDocumentProps = {
