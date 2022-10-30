@@ -6,6 +6,7 @@ import sendError from 'src/utils/sendError';
 import { createToken } from 'src/utils';
 import InvalidSignInError from 'src/utils/errors/InvalidSignInError';
 import ValidationError from 'src/utils/errors/ValidationError';
+import NotFoundError from 'src/utils/errors/NotFoundError';
 
 const getPublicUserData = (user: UserModelHydrated) => ({
   name: user.name,
@@ -69,5 +70,35 @@ export async function isAuthenticated(req: Request, res: Response): Promise<void
     res.status(200).json({ ok: true, user: getPublicUserData(user) });
   } else {
     res.status(401).json({ ok: false });
+  }
+}
+
+export async function updatePassword(req: Request, res: Response): Promise<void> {
+  const { user } = req;
+  const { password, newPassword, confirmPassword } = req.body;
+
+  try {
+    if (newPassword !== confirmPassword) {
+      throw new ValidationError('Las constraseñas con coinciden', {
+        confirmPassword: {
+          name: 'ValidationError',
+          message: 'Las contraseñas no coinciden',
+          path: 'confirmPassword',
+          value: '',
+        },
+      });
+    }
+
+    if (!user) throw new NotFoundError('Usuario no encontrado');
+
+    const isValid = await bcrypt.compare(password, user.password);
+    if (!isValid) throw new InvalidSignInError('Contraseña incorrecta.');
+
+    user.password = newPassword;
+    await user.save({ validateModifiedOnly: true });
+
+    res.status(200).json({ ok: true });
+  } catch (error) {
+    sendError(error, res);
   }
 }

@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { isAuthenticated, signin, signup } from 'src/controllers/Auth.controller';
+import { isAuthenticated, signin, signup, updatePassword } from 'src/controllers/Auth.controller';
 import userAuth from 'src/middleware/UserAuth';
 import * as userController from 'src/controllers/User.controller';
 import adminAuth from 'src/middleware/AdminAuth';
@@ -93,6 +93,37 @@ router.route('/local/signin').post(signin);
  *      - bearerAuth: []
  */
 router.route('/local/is-authenticated').get(userAuth, isAuthenticated);
+
+/**
+ * Route for auth user
+ * @openapi
+ * /auth/local/update-password:
+ *  put:
+ *    tags:
+ *      - Auth
+ *    summary: Update the user password
+ *    description: This end point update the password of user.
+ *    requestBody:
+ *      content:
+ *        application/json:
+ *          schema:
+ *            $ref: "#/components/schemas/updatePassword"
+ *      required: true
+ *    responses:
+ *      200:
+ *        description: The password was updated succesfully
+ *      400:
+ *        description: The current password is wrong
+ *      401:
+ *        description: The user is not authenticated
+ *      404:
+ *        description: The user is not authenticated
+ *      422:
+ *        description: Validation error for new password o confirm password
+ *    security:
+ *      - bearerAuth: []
+ */
+router.route('/local/update-password').put(userAuth, updatePassword);
 
 // --------------------------------------------------------------------------------------------------------------------
 // ROUTES FOR ADMIN USERS
