@@ -205,6 +205,10 @@ const schema: { [key: string]: Reference | Schema } = {
         type: 'string',
         example: 'This is a optional description for this product.',
       },
+      stock: {
+        type: 'number',
+        example: 100,
+      },
       isInventoriable: {
         type: 'boolean',
         example: false,
