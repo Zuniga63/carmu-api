@@ -71,6 +71,41 @@ router.route('/transactions').get(controller.transactionList);
 router.route('/transactions').post(controller.addTransaction);
 /**
  * @openapi
+ * /main-box/transactions/{transactionId}:
+ *  delete:
+ *    tags:
+ *      - 'Main Box'
+ *    summary: Delete transaction by ID
+ *    description: This end point transaction the transaction in data base
+ *    parameters:
+ *      - name: transactionId
+ *        in: path
+ *        description: The id of transaction to update
+ *        required: true
+ *        schema:
+ *          type: string
+ *    responses:
+ *      200:
+ *        description: Transaction deleted
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                transaction:
+ *                  $ref: '#/components/schemas/transaction'
+ *      400:
+ *        description: The box is not open, the transaction is a transfer
+ *      401:
+ *        description: only admin users can acces the information
+ *      404:
+ *        description: The box or trnasaction not found.
+ *    security:
+ *      - bearerAuth: []
+ */
+router.route('/transactions/:transactionId').delete(controller.destroyTransaction);
+/**
+ * @openapi
  * /main-box/closing-list:
  *  get:
  *    tags:

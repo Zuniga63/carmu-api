@@ -2,6 +2,7 @@ import dayjs from 'dayjs';
 import { Request, Response } from 'express';
 import CashboxTransactionModel from 'src/models/CashboxTransaction.model';
 import CashClosingRecordModel from 'src/models/CashClosingRecord.model';
+import CashboxError from 'src/utils/errors/CashboxError';
 import NotFoundError from 'src/utils/errors/NotFoundError';
 import sendError from 'src/utils/sendError';
 
@@ -56,6 +57,21 @@ export async function addTransaction(req: Request, res: Response) {
     });
 
     res.status(201).json({ transaction });
+  } catch (error) {
+    sendError(error, res);
+  }
+}
+
+export async function destroyTransaction(req: Request, res: Response) {
+  const { transactionId } = req.params;
+  try {
+    const transaction = await CashboxTransactionModel.findById(transactionId);
+    if (!transaction) throw new NotFoundError('Transacción no encontrada');
+
+    if (transaction.isTransfer) throw new CashboxError('Las transferencias no pueden eliminarse');
+    await transaction.remove();
+
+    res.status(200).json({ transaction });
   } catch (error) {
     sendError(error, res);
   }
