@@ -15,6 +15,7 @@ import {
   IInvoiceItem,
   IInvoicePayment,
   InvoiceHydrated,
+  ProductHydrated,
   UserModelHydrated,
 } from 'src/types';
 import NotFoundError from 'src/utils/errors/NotFoundError';
@@ -263,6 +264,29 @@ const buildSaleOperations = (invoice: InvoiceHydrated) => {
   return saleOperations;
 };
 
+const updateProductStocks = async ({ items }: InvoiceHydrated) => {
+  const productUpdates: ProductHydrated[] = [];
+  const itemsWithProducts = items.filter((item) => Boolean(item.product));
+  const products = await Promise.all(
+    itemsWithProducts.map(({ product }) => ProductModel.findById(product).select('stock isInventoriable')),
+  );
+
+  if (Array.isArray(products)) {
+    (products as (ProductHydrated | null)[]).forEach((product) => {
+      if (product && product.isInventoriable) {
+        // Get the item with product for get the units to discount
+        const item = itemsWithProducts.find((item) => item.product?.equals(product._id));
+        if (item) {
+          product.stock = product.stock - item.quantity;
+          productUpdates.push(product);
+        }
+      }
+    });
+  }
+
+  return productUpdates;
+};
+
 export async function store(req: Request, res: Response) {
   const data = req.body;
   const { cashPayments, isSeparate } = data;
@@ -278,12 +302,14 @@ export async function store(req: Request, res: Response) {
 
     const { payments, cashboxs, transactions } = await buildPaymentsAndTransactions(invoice, cashPayments);
     const saleOperations = buildSaleOperations(invoice);
+    const products = await updateProductStocks(invoice);
     invoice.payments.push(...payments);
 
     await Promise.all([
       ...cashboxs.map((c) => c.save({ validateBeforeSave: false })),
       ...transactions.map((t) => t.save({ validateBeforeSave: false })),
       ...saleOperations.map((sOp) => sOp.save()),
+      ...products.map((p) => p.save({ validateBeforeSave: false })),
       invoice.save(),
     ]);
 

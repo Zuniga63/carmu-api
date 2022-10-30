@@ -96,6 +96,24 @@ const schemas: {
       },
     },
   },
+  updatePassword: {
+    type: 'object',
+    required: ['password', 'newPassword', 'confirmPassword'],
+    properties: {
+      password: {
+        type: 'string',
+        example: 'Clave123*',
+      },
+      newPassword: {
+        type: 'string',
+        example: 'Clave123*',
+      },
+      confirmPassword: {
+        type: 'string',
+        example: 'Clave123*',
+      },
+    },
+  },
   authResponse: {
     type: 'object',
     properties: {

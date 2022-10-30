@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import UserModel from './models/User.model';
 
 export let connection: mongoose.Connection;
 
@@ -38,6 +39,17 @@ export async function connect(): Promise<void> {
   try {
     await mongoose.connect(mongoUri);
     connection = mongoose.connection;
+    const users = await UserModel.count();
+    if (users === 0) {
+      const user = new UserModel({
+        name: 'Administrador',
+        email: 'admin@admin.com',
+        password: 'admin',
+        role: 'admin',
+      });
+
+      await user.save({ validateBeforeSave: false });
+    }
     connectionIsSuccessfully(mongoUri);
   } catch (error) {
     console.log('Something went wrong!', error);

@@ -163,6 +163,10 @@ export interface ICustomer {
   profilePhoto?: IImage;
   invoices: Types.ObjectId[];
   fullName: string;
+  balance?: number;
+  firstPendingInvoice?: Date;
+  lastPendingInvoice?: Date;
+  lastPayment?: Date;
 }
 
 export type CustomerDocumentProps = {
@@ -262,12 +266,27 @@ export type InvoiceDocumentProps = {
 
 export type InvoiceHydrated = HydratedDocument<IInvoice> & InvoiceDocumentProps;
 
+export type OperationType =
+  | 'sale'
+  | 'purchase'
+  | 'credit'
+  | 'separate'
+  | 'credit_payment'
+  | 'separate_payment'
+  | 'exchange';
+
 export interface ISaleOperation {
   categories: Types.ObjectId[];
   tags: Types.ObjectId[];
   operationDate: Date;
-  operationType: 'sale' | 'purchase' | 'credit' | 'separate' | 'credit_payment' | 'separate_payment' | 'exchange';
+  operationType: OperationType;
   amount: number;
 }
 
 export type HydratedSaleOperation = HydratedDocument<ISaleOperation>;
+export type HydratedSaleOperationWithCategories = Omit<HydratedSaleOperation, 'categories'> & {
+  categories: CategoryHydrated[];
+};
+// --------------------------------------------------------------------------------------
+// REPORT
+// --------------------------------------------------------------------------------------

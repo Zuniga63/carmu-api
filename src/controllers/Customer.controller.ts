@@ -1,7 +1,9 @@
 import dayjs from 'dayjs';
 import { Request, Response } from 'express';
+import { Types } from 'mongoose';
 import CustomerModel from 'src/models/Customer.model';
-import { CustomerContactLite } from 'src/types';
+import InvoiceModel from 'src/models/Invoice.model';
+import { CustomerContactLite, IInvoicePayment } from 'src/types';
 import { removeNonNumericChars, removeNonPhoneChars } from 'src/utils';
 import NotFoundError from 'src/utils/errors/NotFoundError';
 import sendError from 'src/utils/sendError';
@@ -32,9 +34,50 @@ function getContacts(contacts: unknown) {
 // ----------------------------------------------------------------------------
 //  API
 // ----------------------------------------------------------------------------
+interface PendingInvoiceGroup {
+  _id: Types.ObjectId;
+  balance: number;
+  firstPendingInvoice: Date;
+  lastPendingInvoice: Date;
+  paymentsByInvoices: IInvoicePayment[][];
+}
 export const list = async (_req: Request, res: Response) => {
   try {
-    const customers = await CustomerModel.find({}).sort('firstName').sort('lastName');
+    const customerModels = await CustomerModel.find({}).sort('firstName').sort('lastName');
+    const customers = customerModels.map((customer) => customer.toObject());
+
+    const balanceResults = await InvoiceModel.aggregate<PendingInvoiceGroup>()
+      .sort('expeditionDate')
+      .match({ balance: { $ne: null }, customer: { $ne: null }, cancel: { $ne: true }, isSeparate: { $ne: true } })
+      .group({
+        _id: '$customer',
+        balance: { $sum: '$balance' },
+        firstPendingInvoice: { $first: '$expeditionDate' },
+        lastPendingInvoice: { $last: '$expeditionDate' },
+        paymentsByInvoices: { $push: '$payments' },
+      });
+
+    balanceResults.forEach((result) => {
+      const paymentDates: Date[] = [];
+
+      result.paymentsByInvoices.forEach((invoicePayments) => {
+        invoicePayments.forEach((payment) => {
+          paymentDates.push(payment.paymentDate);
+        });
+      });
+
+      paymentDates.sort();
+
+      const customer = customers.find(({ _id }) => _id.equals(result._id));
+      if (customer) {
+        customer.balance = result.balance;
+        customer.firstPendingInvoice = result.firstPendingInvoice;
+        customer.lastPendingInvoice = result.lastPendingInvoice;
+        customer.lastPayment = paymentDates.at(-1);
+      }
+    });
+    //
+
     res.status(200).json({ customers });
   } catch (error) {
     sendError(error, res);

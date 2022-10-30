@@ -4,7 +4,7 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "start": "build/index.js",
+    "start": "NODE_PATH=./build node ./build/src/index.js",
     "dev": "ts-node-dev -r tsconfig-paths/register src/index.ts",
     "build": "tsc",
     "lint": "eslint src/**/*.ts",
