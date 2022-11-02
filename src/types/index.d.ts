@@ -1,3 +1,4 @@
+import { Dayjs } from 'dayjs';
 import { HydratedDocument, Types } from 'mongoose';
 
 export type UserRole = 'admin' | 'editor' | 'seller' | 'user';
@@ -287,6 +288,13 @@ export type HydratedSaleOperation = HydratedDocument<ISaleOperation>;
 export type HydratedSaleOperationWithCategories = Omit<HydratedSaleOperation, 'categories'> & {
   categories: CategoryHydrated[];
 };
+
 // --------------------------------------------------------------------------------------
 // REPORT
 // --------------------------------------------------------------------------------------
+export interface IDailyCreditEvolution {
+  date: Dayjs;
+  credits: number;
+  payments: number;
+  balance: number;
+}

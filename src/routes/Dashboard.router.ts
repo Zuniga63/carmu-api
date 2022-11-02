@@ -48,13 +48,28 @@ router.route('/cash-report').get(adminAuth, controller.cashReport);
  *    responses:
  *      200:
  *        description: Object with annual data
- *      400:
- *        description: The box is not open.
  *      401:
  *        description: only admin auth users can access to the information
  *    security:
  *      - bearerAuth: []
  */
-router.route('/annual-report').get(controller.annualReport);
+router.route('/annual-report').get(adminAuth, controller.annualReport);
+/**
+ * @openapi
+ * /dashboard/credit-evolution:
+ *  get:
+ *    tags:
+ *      - Dashboard
+ *    summary: Get the annual report of credit evolution
+ *    description: This endpoint get sum of credits and payments of last years and anual report of credit and payments
+ *    responses:
+ *      200:
+ *        description: { initialCredit, initialPayment, creditEvolution }
+ *      401:
+ *        description: only admin auth users can access to the information
+ *    security:
+ *      - bearerAuth: []
+ */
+router.route('/credit-evolution').get(controller.creditEvolution);
 
 export default router;

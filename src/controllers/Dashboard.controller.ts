@@ -5,7 +5,7 @@ import CashboxTransactionModel from 'src/models/CashboxTransaction.model';
 import { ShortMonths } from 'src/utils';
 import sendError from 'src/utils/sendError';
 import SaleOperationModel from 'src/models/SaleOperation.model';
-import { CategoryHydrated, OperationType } from 'src/types';
+import { CategoryHydrated, IDailyCreditEvolution, OperationType } from 'src/types';
 import AnnualReport from 'src/utils/reports/AnnualReport';
 
 dayjs.extend(timezone);
@@ -135,6 +135,10 @@ export const cashReport = async (_req: Request, res: Response) => {
   }
 };
 
+// ----------------------------------------------------------------------------
+// ANNUAL REPORTS
+// ----------------------------------------------------------------------------
+
 const getOperationSales = async (from: Dayjs, to: Dayjs, type: OperationType) => {
   const result = await SaleOperationModel.find({ operationDate: { $gte: from, $lt: to }, operationType: type })
     .sort('operationDate')
@@ -148,26 +152,86 @@ const isOperationType = (value: any): value is OperationType => {
   return types.includes(value);
 };
 
+const getAnnualReport = async (operationType: OperationType, year?: number): Promise<AnnualReport> => {
+  const now = dayjs().tz(tz);
+  let fromDate = now.startOf('year');
+  let toDate = now.endOf('year');
+
+  if (year && !isNaN(year)) {
+    fromDate = fromDate.year(Number(year));
+    toDate = fromDate.endOf('year');
+    if (toDate.isAfter(now)) toDate = now.clone();
+  }
+
+  const operations = await getOperationSales(fromDate, toDate, operationType);
+  return new AnnualReport(fromDate.year(), fromDate, toDate, operations);
+};
+
 export const annualReport = async (req: Request, res: Response) => {
   const { year, operation } = req.query;
   const operationType: OperationType = isOperationType(operation) ? operation : 'sale';
-  console.log(operationType);
 
   try {
-    const now = dayjs().tz(tz);
-    let fromDate = now.startOf('year');
-    let toDate = now.endOf('year');
+    const report = await getAnnualReport(operationType, Number(year));
+    res.status(200).json({ report });
+  } catch (error) {
+    sendError(error, res);
+  }
+};
 
-    if (year && !isNaN(Number(year))) {
-      fromDate = fromDate.year(Number(year));
-      toDate = fromDate.endOf('year');
-      if (toDate.isAfter(now)) toDate = now.clone();
+export const creditEvolution = async (_req: Request, res: Response) => {
+  try {
+    const date = dayjs().tz(tz).startOf('year').toDate();
+    let initialBalance = 0;
+
+    const initialSums = await SaleOperationModel.aggregate<{ credits: number; payments: number }>()
+      .sort('operationsDate')
+      .match({
+        operationDate: { $lt: date },
+        operationType: { $in: ['credit', 'credit_payment'] },
+      })
+      .group({
+        _id: null,
+        credits: { $sum: { $cond: [{ $eq: ['$operationType', 'credit'] }, '$amount', 0] } },
+        payments: { $sum: { $cond: [{ $eq: ['$operationType', 'credit_payment'] }, '$amount', 0] } },
+      });
+
+    const dailyResume = await SaleOperationModel.aggregate<{
+      _id: { year: number; month: number; day: number };
+      credits: number;
+      payments: number;
+    }>()
+      .sort('operationDate')
+      .match({
+        operationDate: { $gte: date },
+        operationType: { $in: ['credit', 'credit_payment'] },
+      })
+      .group({
+        _id: {
+          year: { $year: '$operationDate' },
+          month: { $month: '$operationDate' },
+          day: { $dayOfMonth: '$operationDate' },
+        },
+        credits: { $sum: { $cond: [{ $eq: ['$operationType', 'credit'] }, '$amount', 0] } },
+        payments: { $sum: { $cond: [{ $eq: ['$operationType', 'credit_payment'] }, '$amount', 0] } },
+      });
+
+    if (initialSums.length > 0) {
+      const { credits, payments } = initialSums[0];
+      initialBalance = credits - payments;
     }
 
-    const operations = await getOperationSales(fromDate, toDate, operationType);
-    const report = new AnnualReport(fromDate.year(), fromDate, toDate, operations);
+    const dailyReports: IDailyCreditEvolution[] = [];
 
-    res.status(200).json({ report });
+    dailyResume.forEach(({ _id, credits, payments }) => {
+      const { year, month, day } = _id;
+      const date = dayjs(`${year}-${month}-${day}`).tz(tz).startOf('day');
+      const balance = credits - payments;
+
+      dailyReports.push({ date, credits, payments, balance });
+    });
+
+    res.status(200).json({ initialBalance, dailyReports });
   } catch (error) {
     sendError(error, res);
   }
