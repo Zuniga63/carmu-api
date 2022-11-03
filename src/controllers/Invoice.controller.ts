@@ -506,6 +506,7 @@ export async function addPayment(req: Request, res: Response) {
             new SaleOperationModel({
               categories: item.categories,
               tags: item.tags,
+              operationDate: paymentDate,
               operationType,
               amount: itemPayment,
             }),

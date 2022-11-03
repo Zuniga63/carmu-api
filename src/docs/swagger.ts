@@ -13,7 +13,7 @@ const swaggerDefinition: OAS3Definition = {
       url: 'http://localhost:8080',
     },
     {
-      url: 'http://192.168.0.120:8080',
+      url: 'http://192.168.1.106:8080',
     },
   ],
   tags,
