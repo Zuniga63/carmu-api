@@ -225,7 +225,7 @@ export const creditEvolution = async (_req: Request, res: Response) => {
 
     dailyResume.forEach(({ _id, credits, payments }) => {
       const { year, month, day } = _id;
-      const date = dayjs(`${year}-${month}-${day}`).tz(tz).startOf('day');
+      const date = dayjs(`${year}-${month}-${day}`).tz(tz).startOf('day').toDate();
       const balance = credits - payments;
 
       dailyReports.push({ date, credits, payments, balance });
