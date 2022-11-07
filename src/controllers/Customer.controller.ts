@@ -1,6 +1,7 @@
 import dayjs from 'dayjs';
 import { Request, Response } from 'express';
 import { Types } from 'mongoose';
+import CashboxModel from 'src/models/Cashbox.model';
 import CashboxTransactionModel from 'src/models/CashboxTransaction.model';
 import CustomerModel from 'src/models/Customer.model';
 import InvoiceModel from 'src/models/Invoice.model';
@@ -54,6 +55,8 @@ interface PendingInvoiceGroup {
 export const list = async (_req: Request, res: Response) => {
   try {
     const customerModels = await CustomerModel.find({}).sort('firstName').sort('lastName');
+    const cashboxs = await CashboxModel.find({}).sort('name').where('openBox').ne(null).select('name openBox');
+
     const customers = customerModels.map((customer) => customer.toObject());
 
     const balanceResults = await InvoiceModel.aggregate<PendingInvoiceGroup>()
@@ -88,7 +91,7 @@ export const list = async (_req: Request, res: Response) => {
     });
     //
 
-    res.status(200).json({ customers });
+    res.status(200).json({ customers, cashboxs });
   } catch (error) {
     sendError(error, res);
   }
