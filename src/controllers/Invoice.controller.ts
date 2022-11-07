@@ -336,7 +336,7 @@ export async function show(req: Request, res: Response) {
   }
 }
 
-const validateNewPaymentData = async (data: any, invoiceDate: Date) => {
+export const validateNewPaymentData = async (data: any, invoiceDate: Date) => {
   const { paymentDate, description, amount, cashboxId, register } = data;
   const errors: any = {};
   let hasError = false;

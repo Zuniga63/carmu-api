@@ -254,6 +254,21 @@ const schema: { [key: string]: Reference | Schema } = {
       },
     },
   },
+  customerPaymentReport: {
+    type: 'object',
+    properties: {
+      date: {
+        type: 'string',
+        format: 'date-time',
+      },
+      description: {
+        type: 'string',
+      },
+      amount: {
+        type: 'number',
+      },
+    },
+  },
 };
 
 export default schema;
