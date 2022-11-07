@@ -247,5 +247,45 @@ router.route('/:customerId/contacts').post(controller.addContact);
  *
  */
 router.route('/:customerId/contacts/:contactId').delete(controller.removeContact);
+/**
+ * @openapi
+ * /customers/{customerId}/add-credit-payment:
+ *  post:
+ *    tags:
+ *      - Customers
+ *    summary: Store new payment to credits
+ *    description: This endpoint store a new payment to invoices of customer
+ *    parameters:
+ *      - name: customerId
+ *        in: path
+ *        description: The id of customer to payment
+ *        required: true
+ *        schema:
+ *          type: string
+ *    requestBody:
+ *      description: Data of new payment
+ *      content:
+ *        application/json:
+ *          schema:
+ *            $ref: '#/components/schemas/addInvoicePayment'
+ *    responses:
+ *      200:
+ *        description: The payment, items affected and message is returned.
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                paymentReports:
+ *                  type: array
+ *                  items:
+ *                    $ref: '#/components/schemas/customerPaymentReport'
+ *      401:
+ *        description: only auth users can acces the information
+ *    security:
+ *      - bearerAuth: []
+ *
+ */
+router.route('/:customerId/add-credit-payment').post(controller.addPayment);
 
 export default router;
