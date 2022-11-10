@@ -65,6 +65,7 @@ const schema = new Schema<IProduct, Model<IProduct>>(
         },
       ],
     },
+    description: String,
     image: Object,
     images: [{ type: Schema.Types.ObjectId, ref: 'ProductImage' }],
     isInventoriable: {
