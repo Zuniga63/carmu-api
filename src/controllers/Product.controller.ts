@@ -42,7 +42,7 @@ const removeProductRefInCategories = async (productId: Types.ObjectId, categorie
 // ----------------------------------------------------------------------------
 export async function list(_req: Request, res: Response) {
   try {
-    const products = await ProductModel.find({}).sort('name');
+    const products = await ProductModel.find({}).sort('name').populate('categories', 'name');
     res.status(200).json({ products });
   } catch (error) {
     sendError(error, res);
