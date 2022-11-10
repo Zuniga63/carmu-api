@@ -65,7 +65,10 @@ export async function store(req: Request, res: Response) {
     });
 
     categories.forEach((category) => category.products.push(product._id));
-    await Promise.all(categories.map((c) => c.save({ validateBeforeSave: false })));
+    await Promise.all([
+      ...categories.map((c) => c.save({ validateBeforeSave: false })),
+      product.populate('categories', 'name'),
+    ]);
 
     res.status(201).json({ product });
   } catch (error) {
@@ -153,12 +156,12 @@ export async function update(req: Request, res: Response) {
 
       if (categories.length) {
         product.categories = categories;
-        await Promise.all(
-          categories.map((c) => {
+        await Promise.all([
+          ...categories.map((c) => {
             c.products.push(product._id);
             return c.save({ validateBeforeSave: false });
           }),
-        );
+        ]);
       }
     }
 
