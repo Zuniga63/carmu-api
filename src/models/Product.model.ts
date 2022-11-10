@@ -13,18 +13,6 @@ const schema = new Schema<IProduct, Model<IProduct>>(
       minlength: [3, 'Debe tener minimo 3 caracteres.'],
       maxlength: [90, 'Debe tener una maximo de 90 caracteres'],
       required: [true, 'El campo nombre es requerido.'],
-      validate: [
-        {
-          async validator(value: string) {
-            try {
-              return !(await models.Product.exists({ name: value }));
-            } catch (error) {
-              return false;
-            }
-          },
-          message: 'Ya existe un producto con este nombre.',
-        },
-      ],
     },
     ref: {
       type: String,
