@@ -33,7 +33,7 @@ export async function list(_req: Request, res: Response) {
       InvoiceModel.find({})
         .sort('expeditionDate')
         .select('-items -payments')
-        .populate('customer', 'firstName lastName'),
+        .populate('customer', 'firstName lastName documentNumber'),
       CustomerModel.find({}).sort('firstName').sort('lastName'),
       CategoryModel.find({}).where('mainCategory').equals(null).sort('name').select('mainCategory name'),
       ProductModel.find({}).sort('name').select('-images -isInventoriable -sold -returned'),
@@ -314,7 +314,7 @@ export async function store(req: Request, res: Response) {
       invoice.save(),
     ]);
 
-    const result = await invoice.populate('customer', 'firstName lastName');
+    const result = await invoice.populate('customer', 'firstName lastName documentNumber');
 
     res.status(201).json({ invoice: result });
   } catch (error) {
@@ -328,7 +328,7 @@ export async function store(req: Request, res: Response) {
 export async function show(req: Request, res: Response) {
   const { invoiceId } = req.params;
   try {
-    const invoice = await InvoiceModel.findById(invoiceId).populate('customer', 'firstName lastName');
+    const invoice = await InvoiceModel.findById(invoiceId).populate('customer', 'firstName lastName documentNumber');
     if (!invoice) throw new NotFoundError('Factura no encontrada.');
 
     res.status(200).json({ invoice });
