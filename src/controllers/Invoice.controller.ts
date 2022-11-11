@@ -76,11 +76,12 @@ const setInvoiceCustomer = async (invoice: InvoiceHydrated, data: any) => {
   }
 
   // Complete the missing data
-  invoice.customerName ??= customerName;
+  if (invoice.customerName === 'Mostrador' && customerName) invoice.customerName = customerName;
   invoice.customerAddress ??= customerAddress;
   invoice.customerDocument ??= customerDocument;
   invoice.customerDocumentType ??= customerDocumentType;
   invoice.customerPhone ??= customerPhone;
+  console.log(invoice);
 };
 
 const setInvoiceSeller = async (invoice: InvoiceHydrated, data: any, user?: UserModelHydrated) => {
