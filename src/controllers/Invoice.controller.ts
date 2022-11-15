@@ -237,7 +237,9 @@ const buildPaymentsAndTransactions = async (invoice: InvoiceHydrated, cashPaymen
 };
 
 export const createSaleOperationDescription = (invoice: InvoiceHydrated, item: IInvoiceItem): string => {
-  return `Factura #:${invoice.prefixNumber} - ${invoice.customerName}: (${item.quantity}) ${item.description}`;
+  return `Factura #:${invoice.prefixNumber} - ${invoice.customerName}: ${item.description} (${item.quantity} Und${
+    item.quantity > 1 ? 's' : ''
+  }.)`;
 };
 
 const buildSaleOperations = (invoice: InvoiceHydrated) => {
