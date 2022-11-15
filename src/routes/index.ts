@@ -10,6 +10,7 @@ import DashboardRouter from './Dashboard.router';
 import CustomerRouter from './Customer.router';
 import ProductRouter from './Product.router';
 import InvoiceRouter from './Invoice.router';
+import SaleHistoryRouter from './SaleHistory.router';
 
 const rootRouter = Router();
 
@@ -21,5 +22,6 @@ rootRouter.use('/main-box', adminAuth, MainBoxRouter);
 rootRouter.use('/customers', userAuth, CustomerRouter);
 rootRouter.use('/products', ProductRouter);
 rootRouter.use('/invoices', userAuth, InvoiceRouter);
+rootRouter.use('/sale-history', SaleHistoryRouter);
 
 export default rootRouter;

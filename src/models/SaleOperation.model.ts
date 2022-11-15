@@ -12,6 +12,7 @@ const schema = new Schema<ISaleOperation>({
     required: true,
   },
   amount: { type: Number, required: true },
+  description: String,
 });
 
 schema.pre('save', function preSave(next) {

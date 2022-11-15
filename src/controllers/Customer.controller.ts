@@ -17,7 +17,7 @@ import {
 import { removeNonNumericChars, removeNonPhoneChars } from 'src/utils';
 import NotFoundError from 'src/utils/errors/NotFoundError';
 import sendError from 'src/utils/sendError';
-import { validateNewPaymentData } from './Invoice.controller';
+import { validateNewPaymentData, createSaleOperationDescription } from './Invoice.controller';
 
 // ----------------------------------------------------------------------------
 //  UTILS
@@ -234,6 +234,7 @@ const payInvoice = (
           tags: item.tags,
           operationDate: paymentDate,
           operationType: invoice.isSeparate ? 'separate_payment' : 'credit_payment',
+          description: createSaleOperationDescription(invoice, item),
           amount: itemPayment,
         }),
       );
