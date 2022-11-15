@@ -280,6 +280,7 @@ export interface ISaleOperation {
   tags: Types.ObjectId[];
   operationDate: Date;
   operationType: OperationType;
+  description: string;
   amount: number;
 }
 

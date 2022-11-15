@@ -81,7 +81,6 @@ const setInvoiceCustomer = async (invoice: InvoiceHydrated, data: any) => {
   invoice.customerDocument ??= customerDocument;
   invoice.customerDocumentType ??= customerDocumentType;
   invoice.customerPhone ??= customerPhone;
-  console.log(invoice);
 };
 
 const setInvoiceSeller = async (invoice: InvoiceHydrated, data: any, user?: UserModelHydrated) => {
@@ -237,20 +236,27 @@ const buildPaymentsAndTransactions = async (invoice: InvoiceHydrated, cashPaymen
   return { payments, cashboxs, transactions };
 };
 
+export const createSaleOperationDescription = (invoice: InvoiceHydrated, item: IInvoiceItem): string => {
+  return `Factura #:${invoice.prefixNumber} - ${invoice.customerName}: (${item.quantity}) ${item.description}`;
+};
+
 const buildSaleOperations = (invoice: InvoiceHydrated) => {
   const saleOperations: HydratedSaleOperation[] = [];
 
   invoice.items.forEach((item) => {
     const { categories, tags, amount, balance } = item;
-    const properties = { categories, tags, operationDate: invoice.expeditionDate };
+    const properties = {
+      categories,
+      tags,
+      operationDate: invoice.expeditionDate,
+      description: createSaleOperationDescription(invoice, item),
+    };
 
     const saleAmount = amount - (balance || 0);
     if (saleAmount) {
       const operation = new SaleOperationModel({ ...properties, amount: saleAmount, operationType: 'sale' });
       saleOperations.push(operation);
-    }
-
-    if (balance) {
+    } else if (balance) {
       // Register credit or separate
       saleOperations.push(
         new SaleOperationModel({
@@ -509,6 +515,7 @@ export async function addPayment(req: Request, res: Response) {
               tags: item.tags,
               operationDate: paymentDate,
               operationType,
+              description: createSaleOperationDescription(invoice as unknown as InvoiceHydrated, item),
               amount: itemPayment,
             }),
           );
