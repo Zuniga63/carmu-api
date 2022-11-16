@@ -14,6 +14,7 @@ const schema = new Schema<ICashbox, Model<ICashbox>>(
     cashierName: String,
     base: {
       type: Number,
+      min: [0, 'La base no puede ser negativa'],
       default: 0,
     },
     openBox: Date,
