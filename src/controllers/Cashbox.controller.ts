@@ -201,16 +201,14 @@ export async function openBox(req: Request, res: Response) {
     }
 
     // Validate base
-    if (base) {
-      if (typeof base !== 'number') {
-        errors.base = { name: 'base', message: 'No tiene un formato válido.' };
-        hasError = true;
-      } else if (base < 0) {
-        errors.base = { name: 'base', message: 'No puede ser menor que cero.' };
-        hasError = true;
-      }
-    } else {
+    if (typeof base === 'undefined') {
       errors.base = { name: 'base', message: 'La base es requerida.' };
+      hasError = true;
+    } else if (isNaN(Number(base))) {
+      errors.base = { name: 'base', message: 'No tiene un formato válido.' };
+      hasError = true;
+    } else if (Number(base) < 0) {
+      errors.base = { name: 'base', message: 'No puede ser menor que cero.' };
       hasError = true;
     }
 
