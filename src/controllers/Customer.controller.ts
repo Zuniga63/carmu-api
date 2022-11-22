@@ -337,3 +337,38 @@ export const addPayment = async (req: Request, res: Response) => {
     sendError(error, res);
   }
 };
+
+export const getPayments = async (req: Request, res: Response) => {
+  try {
+    const { customerId } = req.params;
+    const payments: IInvoicePayment[] = [];
+
+    const customer = await CustomerModel.findById(customerId);
+    if (!customer) throw new NotFoundError('Cliente no encontrado');
+
+    const invoices = await InvoiceModel.find({ customer: customer._id })
+      .where('credit')
+      .ne(null)
+      .sort('expeditionDate')
+      .select('expeditionDate payments');
+
+    invoices.forEach((invoice) => {
+      payments.push(...invoice.payments);
+    });
+
+    payments.sort((a, b) => {
+      const lastPayment = dayjs(a.paymentDate);
+      const currentPayment = dayjs(b.paymentDate);
+      let result = 0;
+
+      if (currentPayment.isBefore(lastPayment)) result = -1;
+      else if (currentPayment.isAfter(lastPayment)) result = 1;
+
+      return result;
+    });
+
+    res.status(200).json({ payments });
+  } catch (error) {
+    sendError(error, res);
+  }
+};
