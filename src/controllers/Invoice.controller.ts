@@ -258,7 +258,8 @@ const buildSaleOperations = (invoice: InvoiceHydrated) => {
     if (saleAmount) {
       const operation = new SaleOperationModel({ ...properties, amount: saleAmount, operationType: 'sale' });
       saleOperations.push(operation);
-    } else if (balance) {
+    }
+    if (balance) {
       // Register credit or separate
       saleOperations.push(
         new SaleOperationModel({
