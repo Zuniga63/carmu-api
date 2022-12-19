@@ -140,14 +140,9 @@ export const cashReport = async (_req: Request, res: Response) => {
 // ----------------------------------------------------------------------------
 
 const getOperationSales = async (from: Dayjs, to: Dayjs, type: OperationType) => {
-  // This is a temporal code for customer
-  const typeList = [type];
-  if (type === 'sale') {
-    typeList.push('separate_payment');
-  }
   const result = await SaleOperationModel.find({
     operationDate: { $gte: from, $lt: to },
-    operationType: { $in: typeList },
+    operationType: type,
   })
     .sort('operationDate')
     .populate<{ categories: CategoryHydrated[] }>('categories', 'mainCategory name level subcategories');
