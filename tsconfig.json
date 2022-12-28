@@ -18,5 +18,5 @@
     "forceConsistentCasingInFileNames": true,
     "noFallthroughCasesInSwitch": true
   },
-  "exclude": ["legacy"]
+  "exclude": ["legacy", "dist", "node_modules"]
 }
