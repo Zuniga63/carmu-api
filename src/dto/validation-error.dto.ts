@@ -30,6 +30,29 @@ export default class ValidationErrorDto {
             type: 'string',
             example: 'The value of wrong property',
           },
+          children: {
+            type: 'array',
+            description: 'Where the field is an array',
+            items: {
+              type: 'object',
+              properties: {
+                index: { type: 'string', example: '0' },
+                errors: {
+                  type: 'object',
+                  properties: {
+                    message: {
+                      type: 'string',
+                      example: 'A message for some validation',
+                    },
+                    value: {
+                      type: 'string',
+                      example: 'The value of wrong property',
+                    },
+                  },
+                },
+              },
+            },
+          },
         },
       },
     },
