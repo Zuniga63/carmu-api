@@ -8,6 +8,7 @@ import { UsersModule } from './modules/users/users.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { CloudinaryModule } from './modules/cloudinary/cloudinary.module';
 import { MailModule } from './modules/mail/mail.module';
+import { CustomersModule } from './modules/customers/customers.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { MailModule } from './modules/mail/mail.module';
     AuthModule,
     CloudinaryModule,
     MailModule,
+    CustomersModule,
   ],
   controllers: [AppController],
   providers: [AppService],

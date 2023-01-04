@@ -63,8 +63,8 @@ export default [
   // USER PERMISSIONS
   // --------------------------------------------------------------------------
   {
-    id: 1,
-    name: 'Usuario',
+    id: 2,
+    name: 'Usuarios',
     description: 'Permisos para la adminsitración de los usuarios',
     permissions: [
       // CREATE
@@ -95,6 +95,41 @@ export default [
         id: 4,
         name: 'Eliminar',
         key: Permission.DELETE_USER,
+      },
+    ],
+  },
+  // --------------------------------------------------------------------------
+  // ROLES PERMISSIONS
+  // --------------------------------------------------------------------------
+  {
+    id: 3,
+    name: 'Clientes',
+    description:
+      'Permisos para la adminsitración de los clientes de la paltaforma',
+    permissions: [
+      // CREATE
+      {
+        id: 1,
+        name: 'Crear',
+        key: Permission.CREATE_NEW_CUSTOMER,
+      },
+      // READ
+      {
+        id: 2,
+        name: 'Ver',
+        key: Permission.READ_CUSTOMER,
+      },
+      // UPDATE
+      {
+        id: 3,
+        name: 'Editar',
+        key: Permission.UPDATE_CUSTOMER,
+      },
+      // DELETE
+      {
+        id: 4,
+        name: 'Eliminar',
+        key: Permission.DELETE_CUSTOMER,
       },
     ],
   },

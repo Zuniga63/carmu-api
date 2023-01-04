@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Schema as MongooseSchema, HydratedDocument } from 'mongoose';
+import { Customer } from 'src/modules/customers/schemas/customer.schema';
 import { Role } from 'src/modules/roles/schemas/role.schema';
 import { emailRegex, IImage } from 'src/utils';
 
@@ -10,7 +11,7 @@ export class User {
   id: string;
 
   @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'Role' })
-  role: Role;
+  role?: Role;
 
   @Prop({
     required: [true, 'El nombre de usuario es requerido'],
@@ -40,6 +41,9 @@ export class User {
 
   @Prop({ default: false })
   isAdmin: boolean;
+
+  @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'Customer' })
+  customer?: Customer;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

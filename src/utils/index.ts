@@ -19,6 +19,12 @@ export const emailRegex = /^[^@]+@[^@]+.[^@]+$/;
 export const strongPass =
   /(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^A-Za-z0-9])(?=.{8,})/;
 
+export const removeNonNumericChars = (value: any) =>
+  String(value).replace(/[^\d]/g, '');
+
+export const removeNonPhoneChars = (value: any) =>
+  String(value).replace(/[^+0-9]/g, '');
+
 export interface IImage {
   publicId: string;
   width: number;

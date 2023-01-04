@@ -15,6 +15,13 @@ export enum Permission {
   READ_USER = 'READ_USER',
   DELETE_USER = 'DELETE_USER',
   // ---------------------------------------------------------------
+  // CUSTOMER PERMISSIONS
+  // ---------------------------------------------------------------
+  CREATE_NEW_CUSTOMER = 'CREATE_NEW_CUSTOMER',
+  READ_CUSTOMER = 'READ_CUSTOMER',
+  UPDATE_CUSTOMER = 'UPDATE_CUSTOMER',
+  DELETE_CUSTOMER = 'DELETE_CUSTOMER',
+  // ---------------------------------------------------------------
   // SUPER ADMIN PERMISSIONS
   // ---------------------------------------------------------------
   INSTALL_CLOUD_PRESETS = 'INSTALL_CLOUD_PRESSETS',
