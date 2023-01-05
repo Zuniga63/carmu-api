@@ -9,6 +9,11 @@ import { AuthModule } from './modules/auth/auth.module';
 import { CloudinaryModule } from './modules/cloudinary/cloudinary.module';
 import { MailModule } from './modules/mail/mail.module';
 import { CustomersModule } from './modules/customers/customers.module';
+import { CategoriesModule } from './modules/categories/categories.module';
+import { CashboxsModule } from './modules/cashboxs/cashboxs.module';
+import { ProductsModule } from './modules/products/products.module';
+import { SaleOperationsModule } from './modules/sale-operations/sale-operations.module';
+import { InvoicesModule } from './modules/invoices/invoices.module';
 
 @Module({
   imports: [
@@ -25,6 +30,11 @@ import { CustomersModule } from './modules/customers/customers.module';
     CloudinaryModule,
     MailModule,
     CustomersModule,
+    CategoriesModule,
+    CashboxsModule,
+    ProductsModule,
+    SaleOperationsModule,
+    InvoicesModule,
   ],
   controllers: [AppController],
   providers: [AppService],
