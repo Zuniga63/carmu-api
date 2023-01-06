@@ -7,11 +7,17 @@ import {
   Param,
   Delete,
 } from '@nestjs/common';
+import { ApiBearerAuth, ApiForbiddenResponse, ApiTags } from '@nestjs/swagger';
 import { CashboxsService } from './cashboxs.service';
 import { CreateCashboxDto } from './dto/create-cashbox.dto';
 import { UpdateCashboxDto } from './dto/update-cashbox.dto';
 
 @Controller('cashboxs')
+@ApiTags('Cashboxs')
+@ApiBearerAuth()
+@ApiForbiddenResponse({
+  description: 'Only user with the permissions can acces to this end points.',
+})
 export class CashboxsController {
   constructor(private readonly cashboxsService: CashboxsService) {}
 
