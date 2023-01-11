@@ -25,9 +25,16 @@ export class CashboxsService {
     @InjectModel(User.name) private userModel: Model<UserDocument>
   ) {}
 
-  protected async getUsers(userIds?: string[], user?: User) {
-    // Validate IDs and remove duplicate
-    const ids = userIds
+  // --------------------------------------------------------------------------
+  // UTILS
+  // --------------------------------------------------------------------------
+  /**
+   * This method validates thath they are valid mongose ids and remove duplicates.
+   * @param userIds
+   * @returns
+   */
+  protected getUniqueIds(userIds?: string[]): string[] {
+    return userIds
       ? [
           ...new Set(
             userIds
@@ -36,18 +43,43 @@ export class CashboxsService {
           ),
         ]
       : [];
+  }
+
+  /**
+   * This method get the users with their ids and repéctive boxes.
+   * @param userIds
+   * @param user
+   * @returns
+   */
+  protected async getUsers(userIds?: string[], user?: User) {
+    // Validate IDs and remove duplicate
+    const ids = this.getUniqueIds(userIds);
 
     // Add the current user to list
     if (user && !ids.includes(user.id)) {
       ids.push(user.id);
     }
 
-    const users = await Promise.all(
-      ids.map((id) => this.userModel.findById(id).select('boxes'))
-    );
+    const users = await this.userModel
+      .find({ _id: { $in: ids } })
+      .select('boxes');
 
     return users.filter((item) => Boolean(item)) as UserDocument[];
   }
+
+  protected async getUsersWithPopulateBoxes(userIds?: string[]) {
+    const ids = this.getUniqueIds(userIds);
+    const users = await this.userModel
+      .find({ _id: { $in: ids } })
+      .select('boxes')
+      .populate('boxes', '_id');
+
+    return users.filter((user) => Boolean(user)) as UserDocument[];
+  }
+
+  // --------------------------------------------------------------------------
+  // CREATE
+  // --------------------------------------------------------------------------
 
   async create(createCashboxDto: CreateCashboxDto, user: User) {
     const { name, userIds } = createCashboxDto;
@@ -131,6 +163,7 @@ export class CashboxsService {
 
   async update(id: string, updateCashboxDto: UpdateCashboxDto) {
     const { name, userIds } = updateCashboxDto;
+
     const boxDocument = await this.cashboxModel
       .findById(id)
       .populate('transactions', 'amount')
@@ -139,16 +172,43 @@ export class CashboxsService {
     if (!boxDocument) throw new NotFoundException('Caja no encontrada');
 
     if (userIds) {
-      const newUsers = await this.getUsers(userIds);
-      const oldUsers = await this.getUsers(
-        boxDocument.users.map((user) => user.id)
+      const users = await this.getUsersWithPopulateBoxes(userIds);
+      const boxUsers = await this.getUsersWithPopulateBoxes(
+        boxDocument.users.map((u) => u.id)
       );
+      const usersForRemoveBox: UserDocument[] = [];
+      const usersForAddBox: UserDocument[] = [];
 
-      oldUsers.forEach((user) => {
-        // user.boxes = user.boxes.filter();
+      // Select users for remove box
+      boxUsers.forEach((user) => {
+        if (!users.some((u) => u.id === user.id)) {
+          usersForRemoveBox.push(user as UserDocument);
+        }
       });
 
-      boxDocument.users = await this.getUsers(userIds);
+      // Select user for add box
+      users.forEach((user) => {
+        if (!boxUsers.some((boxUser) => boxUser.id === user.id)) {
+          usersForAddBox.push(user);
+        }
+      });
+
+      console.log(
+        `Delete:${usersForRemoveBox.length}, Add: ${usersForAddBox.length}`
+      );
+
+      await Promise.all([
+        usersForRemoveBox.map((user) => {
+          user.boxes = user.boxes.filter((box) => box.id !== boxDocument.id);
+          return user.save({ validateBeforeSave: false });
+        }),
+        usersForAddBox.map((user) => {
+          user.boxes.push(boxDocument);
+          return user.save({ validateBeforeSave: false });
+        }),
+      ]);
+
+      boxDocument.users = users;
     }
 
     if (name) {

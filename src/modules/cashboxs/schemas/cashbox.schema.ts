@@ -8,6 +8,8 @@ export type CashboxDocument = HydratedDocument<Cashbox>;
 
 @Schema({ timestamps: true, toObject: { virtuals: true } })
 export class Cashbox {
+  id: string;
+
   @Prop({
     type: MongooseSchema.Types.ObjectId,
     ref: 'User',
