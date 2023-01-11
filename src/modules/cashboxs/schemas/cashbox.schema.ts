@@ -6,7 +6,7 @@ import { CashboxTransaction } from './cashbox-transaction.schema';
 
 export type CashboxDocument = HydratedDocument<Cashbox>;
 
-@Schema({ timestamps: true })
+@Schema({ timestamps: true, toObject: { virtuals: true } })
 export class Cashbox {
   @Prop({
     type: MongooseSchema.Types.ObjectId,
@@ -54,6 +54,12 @@ export class Cashbox {
     default: [],
   })
   closingRecords: CashClosingRecord[];
+
+  balance: number;
 }
 
 export const CashboxSchema = SchemaFactory.createForClass(Cashbox);
+
+CashboxSchema.virtual('balance').get(function () {
+  return this.base;
+});

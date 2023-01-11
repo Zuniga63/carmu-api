@@ -1,23 +1,173 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { isValidObjectId, Model, Types } from 'mongoose';
+import { User, UserDocument } from '../users/schema/user.schema';
 import { CreateCashboxDto } from './dto/create-cashbox.dto';
 import { UpdateCashboxDto } from './dto/update-cashbox.dto';
+import {
+  CashClosingRecord,
+  CashClosingRecordDocument,
+} from './schemas/cash-closing-record.schema';
+import {
+  CashboxTransaction,
+  CashboxTransactionDocument,
+} from './schemas/cashbox-transaction.schema';
+import { Cashbox, CashboxDocument } from './schemas/cashbox.schema';
 
 @Injectable()
 export class CashboxsService {
-  create(createCashboxDto: CreateCashboxDto) {
-    return 'This action adds a new cashbox';
+  constructor(
+    @InjectModel(Cashbox.name) private cashboxModel: Model<CashboxDocument>,
+    @InjectModel(CashboxTransaction.name)
+    private transactionModel: Model<CashboxTransactionDocument>,
+    @InjectModel(CashClosingRecord.name)
+    private closingModel: Model<CashClosingRecordDocument>,
+    @InjectModel(User.name) private userModel: Model<UserDocument>
+  ) {}
+
+  protected async getUsers(userIds?: string[], user?: User) {
+    // Validate IDs and remove duplicate
+    const ids = userIds
+      ? [
+          ...new Set(
+            userIds
+              .filter((id) => isValidObjectId(id))
+              .map((id) => id.toLocaleLowerCase())
+          ),
+        ]
+      : [];
+
+    // Add the current user to list
+    if (user && !ids.includes(user.id)) {
+      ids.push(user.id);
+    }
+
+    const users = await Promise.all(
+      ids.map((id) => this.userModel.findById(id).select('boxes'))
+    );
+
+    return users.filter((item) => Boolean(item)) as UserDocument[];
   }
 
-  findAll() {
-    return `This action returns all cashboxs`;
+  async create(createCashboxDto: CreateCashboxDto, user: User) {
+    const { name, userIds } = createCashboxDto;
+    const users = await this.getUsers(userIds, user);
+    const cashbox = await this.cashboxModel.create({ name, users });
+
+    // Add the new box to the users
+    await Promise.all(
+      users.map((user) => {
+        user?.boxes.push(cashbox);
+        return user?.save({ validateBeforeSave: false });
+      })
+    );
+
+    return cashbox;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} cashbox`;
+  async findAll(user: User) {
+    // Get the cashboxes that the user can see
+    const filter = user.isAdmin ? {} : { users: user.id };
+
+    const boxes = await this.cashboxModel
+      .find(filter)
+      .sort('name')
+      .populate('cashier', 'name');
+
+    // For each casbox, the sum of the transactions is recovered
+    const sums = await this.transactionModel
+      .aggregate<{
+        _id: Types.ObjectId | null;
+        amount: number;
+      }>()
+      .match({
+        cashbox: { $in: boxes.map((item) => item._id) },
+      })
+      .group({ _id: '$cashbox', amount: { $sum: '$amount' } });
+
+    // Update the balance of each box
+    return boxes.map((boxItem) => {
+      const sum = sums.find((sumItem) => sumItem._id?.equals(boxItem._id));
+      const box = boxItem.toObject();
+      box.balance += sum?.amount || 0;
+      return box;
+    });
   }
 
-  update(id: number, updateCashboxDto: UpdateCashboxDto) {
-    return `This action updates a #${id} cashbox`;
+  async findOne(id: string, user: User) {
+    const filter = user.isAdmin ? { _id: id } : { _id: id, users: user.id };
+
+    const boxDocument = await this.cashboxModel
+      .findOne(filter)
+      .populate('cashier', 'name')
+      .populate({
+        path: 'users',
+        select: 'name',
+        options: { sort: { name: 1 } },
+      })
+      .populate({
+        path: 'transactions',
+        options: { sort: { transactionDate: 1 } },
+      })
+      .populate({
+        path: 'closingRecords',
+        select:
+          'cashierName opened closingDate base incomes cash leftover observation',
+        options: { sort: { closingDate: -1 }, limit: 10 },
+      });
+
+    if (!boxDocument) {
+      throw new NotFoundException('Caja no encontrada');
+    }
+
+    // Update the box balance
+    const box = boxDocument.toObject();
+    box.transactions.forEach((t) => {
+      box.balance += t.amount;
+    });
+
+    return box;
+  }
+
+  async update(id: string, updateCashboxDto: UpdateCashboxDto) {
+    const { name, userIds } = updateCashboxDto;
+    const boxDocument = await this.cashboxModel
+      .findById(id)
+      .populate('transactions', 'amount')
+      .populate('users', '_id');
+
+    if (!boxDocument) throw new NotFoundException('Caja no encontrada');
+
+    if (userIds) {
+      const newUsers = await this.getUsers(userIds);
+      const oldUsers = await this.getUsers(
+        boxDocument.users.map((user) => user.id)
+      );
+
+      oldUsers.forEach((user) => {
+        // user.boxes = user.boxes.filter();
+      });
+
+      boxDocument.users = await this.getUsers(userIds);
+    }
+
+    if (name) {
+      boxDocument.name = name;
+    }
+
+    await boxDocument.save({ validateModifiedOnly: true });
+
+    const boxBalance = boxDocument.transactions.reduce(
+      (balance, { amount }) => balance + amount,
+      boxDocument.base
+    );
+
+    boxDocument.depopulate('transactions');
+
+    const box = boxDocument.toObject();
+    box.balance = boxBalance;
+
+    return box;
   }
 
   remove(id: number) {

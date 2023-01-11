@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Schema as MongooseSchema, HydratedDocument } from 'mongoose';
+import { Cashbox } from 'src/modules/cashboxs/schemas/cashbox.schema';
 import { Customer } from 'src/modules/customers/schemas/customer.schema';
 import { Role } from 'src/modules/roles/schemas/role.schema';
 import { emailRegex, IImage } from 'src/utils';
@@ -44,6 +45,12 @@ export class User {
 
   @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'Customer' })
   customer?: Customer;
+
+  @Prop({
+    type: [{ type: MongooseSchema.Types.ObjectId, ref: 'Cashbox' }],
+    default: [],
+  })
+  boxes: Cashbox[];
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
