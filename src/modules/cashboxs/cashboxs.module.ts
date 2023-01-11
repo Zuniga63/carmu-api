@@ -11,6 +11,7 @@ import {
   CashClosingRecord,
   CashClosingRecordSchema,
 } from './schemas/cash-closing-record.schema';
+import { User, UserSchema } from '../users/schema/user.schema';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import {
       { name: Cashbox.name, schema: CashboxSchema },
       { name: CashboxTransaction.name, schema: CashboxTransactionSchema },
       { name: CashClosingRecord.name, schema: CashClosingRecordSchema },
+      { name: User.name, schema: UserSchema },
     ]),
   ],
   controllers: [CashboxsController],
