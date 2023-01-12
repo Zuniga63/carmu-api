@@ -163,66 +163,58 @@ export class CashboxsService {
 
   async update(id: string, updateCashboxDto: UpdateCashboxDto) {
     const { name, userIds } = updateCashboxDto;
+    const updates: Promise<any>[] = [];
 
     const boxDocument = await this.cashboxModel
       .findById(id)
       .populate('transactions', 'amount')
       .populate('users', '_id');
 
-    if (!boxDocument) throw new NotFoundException('Caja no encontrada');
-
-    if (userIds) {
-      const users = await this.getUsersWithPopulateBoxes(userIds);
-      const boxUsers = await this.getUsersWithPopulateBoxes(
-        boxDocument.users.map((u) => u.id)
-      );
-      const usersForRemoveBox: UserDocument[] = [];
-      const usersForAddBox: UserDocument[] = [];
-
-      // Select users for remove box
-      boxUsers.forEach((user) => {
-        if (!users.some((u) => u.id === user.id)) {
-          usersForRemoveBox.push(user as UserDocument);
-        }
-      });
-
-      // Select user for add box
-      users.forEach((user) => {
-        if (!boxUsers.some((boxUser) => boxUser.id === user.id)) {
-          usersForAddBox.push(user);
-        }
-      });
-
-      console.log(
-        `Delete:${usersForRemoveBox.length}, Add: ${usersForAddBox.length}`
-      );
-
-      await Promise.all([
-        usersForRemoveBox.map((user) => {
-          user.boxes = user.boxes.filter((box) => box.id !== boxDocument.id);
-          return user.save({ validateBeforeSave: false });
-        }),
-        usersForAddBox.map((user) => {
-          user.boxes.push(boxDocument);
-          return user.save({ validateBeforeSave: false });
-        }),
-      ]);
-
-      boxDocument.users = users;
+    if (!boxDocument) {
+      throw new NotFoundException('Caja no encontrada');
     }
 
     if (name) {
       boxDocument.name = name;
     }
 
-    await boxDocument.save({ validateModifiedOnly: true });
+    if (userIds) {
+      const [newUsers, currentUsers] = await Promise.all([
+        this.getUsersWithPopulateBoxes(userIds),
+        this.getUsersWithPopulateBoxes(boxDocument.users.map(({ id }) => id)),
+      ]);
+
+      // Add cashbox to new user
+      newUsers.forEach((newUser) => {
+        if (!currentUsers.some(({ id }) => id === newUser.id)) {
+          newUser.boxes.push(boxDocument);
+          updates.push(newUser.save({ validateBeforeSave: false }));
+        }
+      });
+
+      // Remove cashbox to the curren user
+      currentUsers.forEach((currentUser) => {
+        if (!newUsers.some(({ id }) => currentUser.id === id)) {
+          const { boxes } = currentUser;
+          currentUser.boxes = boxes.filter(({ id }) => id !== boxDocument.id);
+          updates.push(currentUser.save({ validateBeforeSave: false }));
+        }
+      });
+
+      boxDocument.users = newUsers;
+    }
+
+    updates.push(boxDocument.save({ validateModifiedOnly: true }));
+
+    // await boxDocument.save({ validateModifiedOnly: true });
+    await Promise.all(updates);
 
     const boxBalance = boxDocument.transactions.reduce(
       (balance, { amount }) => balance + amount,
       boxDocument.base
     );
 
-    boxDocument.depopulate('transactions');
+    boxDocument.depopulate('transactions').depopulate('users');
 
     const box = boxDocument.toObject();
     box.balance = boxBalance;
