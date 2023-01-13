@@ -54,6 +54,6 @@ export class CashboxsController {
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.cashboxsService.remove(+id);
+    return this.cashboxsService.remove(id);
   }
 }

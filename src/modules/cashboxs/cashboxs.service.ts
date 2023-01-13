@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { isValidObjectId, Model, Types } from 'mongoose';
 import { User, UserDocument } from '../users/schema/user.schema';
@@ -223,7 +227,34 @@ export class CashboxsService {
     return box;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} cashbox`;
+  async remove(id: string) {
+    const promises: Promise<any>[] = [];
+    const cashbox = await this.cashboxModel.findById(id);
+
+    if (!cashbox) {
+      throw new NotFoundException('Caja no encontrada');
+    }
+
+    if (cashbox.openBox) {
+      throw new BadRequestException('La caja debe cerrarse primero');
+    }
+
+    // Remove box from each user
+    const boxUsers = await this.userModel
+      .find({ _id: { $in: cashbox.users } })
+      .select('boxes')
+      .populate('boxes', '_id');
+
+    boxUsers.forEach((boxUser) => {
+      boxUser.boxes = boxUser.boxes.filter(({ id }) => id !== cashbox.id);
+      promises.push(boxUser.save({ validateBeforeSave: false }));
+    });
+
+    // delete the box
+    promises.push(cashbox.remove());
+
+    await Promise.all(promises);
+
+    return cashbox;
   }
 }
