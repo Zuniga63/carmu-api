@@ -44,8 +44,12 @@ export class CashboxsController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateCashboxDto: UpdateCashboxDto) {
-    return this.cashboxsService.update(id, updateCashboxDto);
+  update(
+    @Param('id') id: string,
+    @Body() updateCashboxDto: UpdateCashboxDto,
+    @Req() req: Request
+  ) {
+    return this.cashboxsService.update(id, updateCashboxDto, req.user as User);
   }
 
   @Delete(':id')

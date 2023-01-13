@@ -33,8 +33,8 @@ export class CashboxsService {
    * @param userIds
    * @returns
    */
-  protected getUniqueIds(userIds?: string[]): string[] {
-    return userIds
+  protected getUniqueIds(userIds?: string[], currentUserId?: string): string[] {
+    const ids = userIds
       ? [
           ...new Set(
             userIds
@@ -43,6 +43,12 @@ export class CashboxsService {
           ),
         ]
       : [];
+
+    if (currentUserId && !ids.includes(currentUserId)) {
+      ids.push(currentUserId);
+    }
+
+    return ids;
   }
 
   /**
@@ -53,12 +59,7 @@ export class CashboxsService {
    */
   protected async getUsers(userIds?: string[], user?: User) {
     // Validate IDs and remove duplicate
-    const ids = this.getUniqueIds(userIds);
-
-    // Add the current user to list
-    if (user && !ids.includes(user.id)) {
-      ids.push(user.id);
-    }
+    const ids = this.getUniqueIds(userIds, user?.id);
 
     const users = await this.userModel
       .find({ _id: { $in: ids } })
@@ -67,8 +68,8 @@ export class CashboxsService {
     return users.filter((item) => Boolean(item)) as UserDocument[];
   }
 
-  protected async getUsersWithPopulateBoxes(userIds?: string[]) {
-    const ids = this.getUniqueIds(userIds);
+  protected async getUsersWithPopulateBoxes(userIds?: string[], user?: User) {
+    const ids = this.getUniqueIds(userIds, user?.id);
     const users = await this.userModel
       .find({ _id: { $in: ids } })
       .select('boxes')
@@ -161,7 +162,7 @@ export class CashboxsService {
     return box;
   }
 
-  async update(id: string, updateCashboxDto: UpdateCashboxDto) {
+  async update(id: string, updateCashboxDto: UpdateCashboxDto, user?: User) {
     const { name, userIds } = updateCashboxDto;
     const updates: Promise<any>[] = [];
 
@@ -180,7 +181,7 @@ export class CashboxsService {
 
     if (userIds) {
       const [newUsers, currentUsers] = await Promise.all([
-        this.getUsersWithPopulateBoxes(userIds),
+        this.getUsersWithPopulateBoxes(userIds, user),
         this.getUsersWithPopulateBoxes(boxDocument.users.map(({ id }) => id)),
       ]);
 
