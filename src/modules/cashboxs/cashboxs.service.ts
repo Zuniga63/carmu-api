@@ -149,7 +149,7 @@ export class CashboxsService {
       .populate({
         path: 'closingRecords',
         select:
-          'cashierName opened closingDate base incomes cash leftover observation',
+          'cashierName opened closingDate base incomes cash leftover missing observation',
         options: { sort: { closingDate: -1 }, limit: 10 },
       });
 
@@ -166,12 +166,13 @@ export class CashboxsService {
     return box;
   }
 
-  async update(id: string, updateCashboxDto: UpdateCashboxDto, user?: User) {
+  async update(id: string, updateCashboxDto: UpdateCashboxDto, user: User) {
     const { name, userIds } = updateCashboxDto;
     const updates: Promise<any>[] = [];
+    const filter = user.isAdmin ? { _id: id } : { _id: id, users: user.id };
 
     const boxDocument = await this.cashboxModel
-      .findById(id)
+      .findOne(filter)
       .populate('transactions', 'amount')
       .populate('users', '_id');
 
@@ -227,9 +228,10 @@ export class CashboxsService {
     return box;
   }
 
-  async remove(id: string) {
+  async remove(id: string, user: User) {
     const promises: Promise<any>[] = [];
-    const cashbox = await this.cashboxModel.findById(id);
+    const filter = user.isAdmin ? { _id: id } : { _id: id, users: user.id };
+    const cashbox = await this.cashboxModel.findOne(filter);
 
     if (!cashbox) {
       throw new NotFoundException('Caja no encontrada');
