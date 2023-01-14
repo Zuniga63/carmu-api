@@ -18,7 +18,8 @@ export class CreateCashboxDto {
   @ApiProperty({
     required: false,
     type: [String],
-    description: 'User IDs that can see the box',
+    description:
+      'User IDs that can access to the box, the current user add by default',
   })
   @IsString({ each: true })
   @IsOptional()

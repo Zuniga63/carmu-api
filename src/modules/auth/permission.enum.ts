@@ -22,6 +22,13 @@ export enum Permission {
   UPDATE_CUSTOMER = 'UPDATE_CUSTOMER',
   DELETE_CUSTOMER = 'DELETE_CUSTOMER',
   // ---------------------------------------------------------------
+  // CUSTOMER PERMISSIONS
+  // ---------------------------------------------------------------
+  CREATE_NEW_CASHBOX = 'CREATE_NEW_CASHBOX',
+  READ_CASHBOX = 'READ_CASHBOX',
+  UPDATE_CASHBOX = 'UPDATE_CASHBOX',
+  DELETE_CASHBOX = 'DELETE_CASHBOX',
+  // ---------------------------------------------------------------
   // SUPER ADMIN PERMISSIONS
   // ---------------------------------------------------------------
   INSTALL_CLOUD_PRESETS = 'INSTALL_CLOUD_PRESSETS',

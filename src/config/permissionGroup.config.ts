@@ -3,6 +3,8 @@ import { Permission } from 'src/modules/auth/permission.enum';
 export enum PermissionGroupKeys {
   roles,
   users,
+  customers,
+  cashboxes,
 }
 
 export default [
@@ -10,7 +12,7 @@ export default [
   // ROLES PERMISSIONS
   // --------------------------------------------------------------------------
   {
-    id: 1,
+    id: PermissionGroupKeys.roles,
     name: 'Roles',
     description:
       'Permisos para la adminsitración de los roles de la paltaforma',
@@ -63,7 +65,7 @@ export default [
   // USER PERMISSIONS
   // --------------------------------------------------------------------------
   {
-    id: 2,
+    id: PermissionGroupKeys.users,
     name: 'Usuarios',
     description: 'Permisos para la adminsitración de los usuarios',
     permissions: [
@@ -99,10 +101,10 @@ export default [
     ],
   },
   // --------------------------------------------------------------------------
-  // ROLES PERMISSIONS
+  // CUSTOMER PERMISSIONS
   // --------------------------------------------------------------------------
   {
-    id: 3,
+    id: PermissionGroupKeys.customers,
     name: 'Clientes',
     description:
       'Permisos para la adminsitración de los clientes de la paltaforma',
@@ -130,6 +132,40 @@ export default [
         id: 4,
         name: 'Eliminar',
         key: Permission.DELETE_CUSTOMER,
+      },
+    ],
+  },
+  // --------------------------------------------------------------------------
+  // CASHBOX PERMISSIONS
+  // --------------------------------------------------------------------------
+  {
+    id: PermissionGroupKeys.cashboxes,
+    name: 'Cajas',
+    description: 'Permisos para la adminsitración de las cajas',
+    permissions: [
+      // CREATE
+      {
+        id: 1,
+        name: 'Crear',
+        key: Permission.CREATE_NEW_CASHBOX,
+      },
+      // READ
+      {
+        id: 2,
+        name: 'Ver',
+        key: Permission.READ_CASHBOX,
+      },
+      // UPDATE
+      {
+        id: 3,
+        name: 'Editar',
+        key: Permission.UPDATE_CASHBOX,
+      },
+      // DELETE
+      {
+        id: 4,
+        name: 'Eliminar',
+        key: Permission.DELETE_CASHBOX,
       },
     ],
   },
