@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { isValidObjectId, Model, Types } from 'mongoose';
+import { Document, FilterQuery, isValidObjectId, Model, Types } from 'mongoose';
 import { User, UserDocument } from '../users/schema/user.schema';
 import { CreateCashboxDto } from './dto/create-cashbox.dto';
 import { UpdateCashboxDto } from './dto/update-cashbox.dto';
@@ -82,8 +82,22 @@ export class CashboxsService {
     return users.filter((user) => Boolean(user)) as UserDocument[];
   }
 
+  protected buildCashboxFilter(user: User, id?: string) {
+    const filterQuery: FilterQuery<CashboxDocument> = {};
+
+    if (!user.isAdmin) {
+      filterQuery.users = user.id;
+    }
+
+    if (id) {
+      filterQuery._id = id;
+    }
+
+    return filterQuery;
+  }
+
   // --------------------------------------------------------------------------
-  // CREATE
+  // CASHBOX CRUD
   // --------------------------------------------------------------------------
 
   async create(createCashboxDto: CreateCashboxDto, user: User) {
@@ -104,7 +118,8 @@ export class CashboxsService {
 
   async findAll(user: User) {
     // Get the cashboxes that the user can see
-    const filter = user.isAdmin ? {} : { users: user.id };
+    // const filter = user.isAdmin ? {} : { users: user.id };
+    const filter = this.buildCashboxFilter(user);
 
     const boxes = await this.cashboxModel
       .find(filter)
@@ -132,7 +147,8 @@ export class CashboxsService {
   }
 
   async findOne(id: string, user: User) {
-    const filter = user.isAdmin ? { _id: id } : { _id: id, users: user.id };
+    // const filter = user.isAdmin ? { _id: id } : { _id: id, users: user.id };
+    const filter = this.buildCashboxFilter(user, id);
 
     const boxDocument = await this.cashboxModel
       .findOne(filter)
@@ -169,7 +185,8 @@ export class CashboxsService {
   async update(id: string, updateCashboxDto: UpdateCashboxDto, user: User) {
     const { name, userIds } = updateCashboxDto;
     const updates: Promise<any>[] = [];
-    const filter = user.isAdmin ? { _id: id } : { _id: id, users: user.id };
+    // const filter = user.isAdmin ? { _id: id } : { _id: id, users: user.id };
+    const filter = this.buildCashboxFilter(user, id);
 
     const boxDocument = await this.cashboxModel
       .findOne(filter)
@@ -230,7 +247,8 @@ export class CashboxsService {
 
   async remove(id: string, user: User) {
     const promises: Promise<any>[] = [];
-    const filter = user.isAdmin ? { _id: id } : { _id: id, users: user.id };
+    // const filter = user.isAdmin ? { _id: id } : { _id: id, users: user.id };
+    const filter = this.buildCashboxFilter(user, id);
     const cashbox = await this.cashboxModel.findOne(filter);
 
     if (!cashbox) {
@@ -258,5 +276,12 @@ export class CashboxsService {
     await Promise.all(promises);
 
     return cashbox;
+  }
+
+  // --------------------------------------------------------------------------
+  // CASHBOX OPERATIONS
+  // --------------------------------------------------------------------------
+  async openCashbox(id: string, user: User) {
+    const filter = this.buildCashboxFilter(user, id);
   }
 }
