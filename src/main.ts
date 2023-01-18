@@ -2,6 +2,9 @@ import { ValidationPipe } from '@nestjs/common';
 import { HttpAdapterHost, NestFactory } from '@nestjs/core';
 import { SwaggerModule } from '@nestjs/swagger';
 import mongoose from 'mongoose';
+import utc from 'dayjs/plugin/utc';
+import timezone from 'dayjs/plugin/timezone';
+import dayjs from 'dayjs';
 import { AppModule } from './app.module';
 
 import swaggerConfig from './config/swagger.config';
@@ -10,6 +13,9 @@ import { AllExceptionsFilter } from './utils/all-exceptions.filter';
 
 // *Add virtual for all models
 mongoose.set('toJSON', { virtuals: true });
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
