@@ -4,9 +4,11 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Document, FilterQuery, isValidObjectId, Model, Types } from 'mongoose';
+import dayjs from 'dayjs';
+import { FilterQuery, isValidObjectId, Model, Types } from 'mongoose';
 import { User, UserDocument } from '../users/schema/user.schema';
 import { CreateCashboxDto } from './dto/create-cashbox.dto';
+import { OpenBoxDto } from './dto/open-box.dto';
 import { UpdateCashboxDto } from './dto/update-cashbox.dto';
 import {
   CashClosingRecord,
@@ -118,7 +120,6 @@ export class CashboxsService {
 
   async findAll(user: User) {
     // Get the cashboxes that the user can see
-    // const filter = user.isAdmin ? {} : { users: user.id };
     const filter = this.buildCashboxFilter(user);
 
     const boxes = await this.cashboxModel
@@ -147,7 +148,6 @@ export class CashboxsService {
   }
 
   async findOne(id: string, user: User) {
-    // const filter = user.isAdmin ? { _id: id } : { _id: id, users: user.id };
     const filter = this.buildCashboxFilter(user, id);
 
     const boxDocument = await this.cashboxModel
@@ -185,7 +185,6 @@ export class CashboxsService {
   async update(id: string, updateCashboxDto: UpdateCashboxDto, user: User) {
     const { name, userIds } = updateCashboxDto;
     const updates: Promise<any>[] = [];
-    // const filter = user.isAdmin ? { _id: id } : { _id: id, users: user.id };
     const filter = this.buildCashboxFilter(user, id);
 
     const boxDocument = await this.cashboxModel
@@ -229,7 +228,6 @@ export class CashboxsService {
 
     updates.push(boxDocument.save({ validateModifiedOnly: true }));
 
-    // await boxDocument.save({ validateModifiedOnly: true });
     await Promise.all(updates);
 
     const boxBalance = boxDocument.transactions.reduce(
@@ -247,7 +245,6 @@ export class CashboxsService {
 
   async remove(id: string, user: User) {
     const promises: Promise<any>[] = [];
-    // const filter = user.isAdmin ? { _id: id } : { _id: id, users: user.id };
     const filter = this.buildCashboxFilter(user, id);
     const cashbox = await this.cashboxModel.findOne(filter);
 
@@ -281,7 +278,30 @@ export class CashboxsService {
   // --------------------------------------------------------------------------
   // CASHBOX OPERATIONS
   // --------------------------------------------------------------------------
-  async openCashbox(id: string, user: User) {
+  async openCashbox(id: string, openBoxDto: OpenBoxDto, user: User) {
+    const { base, date } = openBoxDto;
+
+    // Get the cashbox
     const filter = this.buildCashboxFilter(user, id);
+    const cashbox = await this.cashboxModel
+      .findOne(filter)
+      .where('openBox', null);
+
+    if (!cashbox) {
+      throw new NotFoundException();
+    }
+
+    cashbox.base = base || 0;
+    cashbox.openBox = dayjs().toDate();
+
+    if (date && dayjs(date).isValid()) {
+      const { closed } = cashbox;
+      cashbox.openBox = closed && dayjs(closed).isBefore(date) ? date : closed;
+    }
+
+    await cashbox.save({ validateModifiedOnly: true });
+
+    return cashbox;
+    //
   }
 }

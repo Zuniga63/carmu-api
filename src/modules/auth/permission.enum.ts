@@ -22,12 +22,13 @@ export enum Permission {
   UPDATE_CUSTOMER = 'UPDATE_CUSTOMER',
   DELETE_CUSTOMER = 'DELETE_CUSTOMER',
   // ---------------------------------------------------------------
-  // CUSTOMER PERMISSIONS
+  // CASHBOX PERMISSIONS
   // ---------------------------------------------------------------
   CREATE_NEW_CASHBOX = 'CREATE_NEW_CASHBOX',
   READ_CASHBOX = 'READ_CASHBOX',
   UPDATE_CASHBOX = 'UPDATE_CASHBOX',
   DELETE_CASHBOX = 'DELETE_CASHBOX',
+  OPEN_CASHBOX = 'OPEN_CASHBOX',
   // ---------------------------------------------------------------
   // SUPER ADMIN PERMISSIONS
   // ---------------------------------------------------------------

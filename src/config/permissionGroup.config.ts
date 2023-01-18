@@ -167,6 +167,12 @@ export default [
         name: 'Eliminar',
         key: Permission.DELETE_CASHBOX,
       },
+      // OPEN CASHBOX
+      {
+        id: 5,
+        name: 'Abrir caja',
+        key: Permission.OPEN_CASHBOX,
+      },
     ],
   },
 ];

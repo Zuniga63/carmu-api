@@ -8,6 +8,7 @@ import {
   Delete,
   UseGuards,
   Req,
+  UnauthorizedException,
 } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
@@ -30,6 +31,7 @@ import CashboxWithAll from './dto/cashbox-with-all.dto';
 import { CashboxDto } from './dto/cashbox.dto';
 import { CreateCashboxDto } from './dto/create-cashbox.dto';
 import { NewCashboxDto } from './dto/new-cashbox.dto';
+import { OpenBoxDto } from './dto/open-box.dto';
 import { UpdateCashboxDto } from './dto/update-cashbox.dto';
 
 @Controller('cashboxs')
@@ -56,6 +58,7 @@ export class CashboxsController {
     type: NewCashboxDto,
   })
   create(@Body() createCashboxDto: CreateCashboxDto, @Req() req: Request) {
+    if (!req.user) throw new UnauthorizedException();
     return this.cashboxsService.create(createCashboxDto, req.user as User);
   }
 
@@ -70,6 +73,7 @@ export class CashboxsController {
   })
   @ApiOkResponse({ description: 'Ok', type: [CashboxDto] })
   findAll(@Req() req: Request) {
+    if (!req.user) throw new UnauthorizedException();
     return this.cashboxsService.findAll(req.user as User);
   }
 
@@ -85,6 +89,7 @@ export class CashboxsController {
       'The searched box was not found or you do not have access to it',
   })
   findOne(@Param('id') id: string, @Req() req: Request) {
+    if (!req.user) throw new UnauthorizedException();
     return this.cashboxsService.findOne(id, req.user as User);
   }
 
@@ -104,6 +109,7 @@ export class CashboxsController {
     @Body() updateCashboxDto: UpdateCashboxDto,
     @Req() req: Request
   ) {
+    if (!req.user) throw new UnauthorizedException();
     return this.cashboxsService.update(id, updateCashboxDto, req.user as User);
   }
 
@@ -120,6 +126,30 @@ export class CashboxsController {
   })
   @ApiBadRequestResponse({ description: 'The box is open' })
   remove(@Param('id') id: string, @Req() req: Request) {
+    if (!req.user) throw new UnauthorizedException();
     return this.cashboxsService.remove(id, req.user as User);
+  }
+
+  // ------------------------------------------------------------------------------------
+  // OPEN CASHBOX
+  // ------------------------------------------------------------------------------------
+  @Patch(':id/open-box')
+  @RequirePermissions(Permission.OPEN_CASHBOX)
+  @ApiOperation({
+    summary: 'Open cashbox with a base',
+    description:
+      'By default the base is set to zero and the date at this time or after last close',
+  })
+  @ApiOkResponse({ description: 'The box is open', type: CashboxDto })
+  @ApiNotFoundResponse({
+    description: 'The cashbox not found or already in operation',
+  })
+  openCashbox(
+    @Param('id') id: string,
+    @Body() openBoxDto: OpenBoxDto,
+    @Req() req: Request
+  ) {
+    if (!req.user) throw new UnauthorizedException();
+    return this.cashboxsService.openCashbox(id, openBoxDto, req.user as User);
   }
 }
