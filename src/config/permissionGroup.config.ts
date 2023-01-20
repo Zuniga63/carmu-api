@@ -173,6 +173,11 @@ export default [
         name: 'Abrir caja',
         key: Permission.OPEN_CASHBOX,
       },
+      {
+        id: 6,
+        name: 'Agregar Transacción',
+        key: Permission.ADD_TRANSACTION,
+      },
     ],
   },
 ];

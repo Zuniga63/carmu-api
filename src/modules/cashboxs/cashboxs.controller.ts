@@ -30,6 +30,7 @@ import { CashboxsService } from './cashboxs.service';
 import CashboxWithAll from './dto/cashbox-with-all.dto';
 import { CashboxDto } from './dto/cashbox.dto';
 import { CreateCashboxDto } from './dto/create-cashbox.dto';
+import { CreateTransactionDto } from './dto/create-transation.dto';
 import { NewCashboxDto } from './dto/new-cashbox.dto';
 import { OpenBoxDto } from './dto/open-box.dto';
 import { UpdateCashboxDto } from './dto/update-cashbox.dto';
@@ -151,5 +152,28 @@ export class CashboxsController {
   ) {
     if (!req.user) throw new UnauthorizedException();
     return this.cashboxsService.openCashbox(id, openBoxDto, req.user as User);
+  }
+  // ------------------------------------------------------------------------------------
+  // TRANSACTIONS
+  // ------------------------------------------------------------------------------------
+  // ------------------------------------------------------------------------------------
+  // CREATE TRANSACTIONS
+  // ------------------------------------------------------------------------------------
+  @Post(':id/transactions')
+  @RequirePermissions(Permission.ADD_TRANSACTION)
+  @ApiOperation({
+    summary: 'Add transaction to the cashbox',
+  })
+  addTransaction(
+    @Param('id') id: string,
+    @Body() createTransactionDto: CreateTransactionDto,
+    @Req() req: Request
+  ) {
+    if (!req.user) throw new UnauthorizedException();
+    return this.cashboxsService.addTransaction(
+      id,
+      createTransactionDto,
+      req.user as User
+    );
   }
 }

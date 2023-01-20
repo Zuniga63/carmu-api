@@ -8,6 +8,7 @@ import dayjs from 'dayjs';
 import { FilterQuery, isValidObjectId, Model, Types } from 'mongoose';
 import { User, UserDocument } from '../users/schema/user.schema';
 import { CreateCashboxDto } from './dto/create-cashbox.dto';
+import { CreateTransactionDto } from './dto/create-transation.dto';
 import { OpenBoxDto } from './dto/open-box.dto';
 import { UpdateCashboxDto } from './dto/update-cashbox.dto';
 import {
@@ -293,15 +294,50 @@ export class CashboxsService {
 
     cashbox.base = base || 0;
     cashbox.openBox = dayjs().toDate();
+    cashbox.cashier = user;
+    cashbox.cashierName = user.name;
 
     if (date && dayjs(date).isValid()) {
       const { closed } = cashbox;
-      cashbox.openBox = closed && dayjs(closed).isBefore(date) ? date : closed;
+      cashbox.openBox = closed && dayjs(closed).isAfter(date) ? closed : date;
     }
 
     await cashbox.save({ validateModifiedOnly: true });
+    cashbox.depopulate('cashier');
 
     return cashbox;
-    //
+  }
+
+  async addTransaction(
+    id: string,
+    createTransactionDto: CreateTransactionDto,
+    user: User
+  ) {
+    // Get the cashbox
+    const filter = this.buildCashboxFilter(user, id);
+    const cashbox = await this.cashboxModel
+      .findOne(filter)
+      .where('openBox')
+      .ne(null);
+    if (!cashbox) throw new NotFoundException();
+
+    // Create transaction
+    const date = dayjs(createTransactionDto.transactionDate);
+    const openBox = dayjs(cashbox.openBox);
+    const transactionDate = date.isBefore(openBox)
+      ? openBox.add(1, 'millisecond')
+      : date;
+
+    const transaction = await this.transactionModel.create({
+      ...createTransactionDto,
+      cashbox: cashbox.id,
+      transactionDate,
+    });
+
+    // Update cashbox
+    cashbox.transactions.push(transaction);
+    await cashbox.save({ validateBeforeSave: false });
+
+    return transaction;
   }
 }

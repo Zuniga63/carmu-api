@@ -29,6 +29,7 @@ export enum Permission {
   UPDATE_CASHBOX = 'UPDATE_CASHBOX',
   DELETE_CASHBOX = 'DELETE_CASHBOX',
   OPEN_CASHBOX = 'OPEN_CASHBOX',
+  ADD_TRANSACTION = 'ADD_TRANSACTION',
   // ---------------------------------------------------------------
   // SUPER ADMIN PERMISSIONS
   // ---------------------------------------------------------------
