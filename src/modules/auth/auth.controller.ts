@@ -75,7 +75,7 @@ export class AuthController {
   // SIGN IN
   // --------------------------------------------------------------------------
   @UseGuards(LocalAuthGuard)
-  @Post('local/singin')
+  @Post('local/signin')
   @ApiOperation({
     summary: 'Login User',
     description: 'Public end point for get access token and user info',
