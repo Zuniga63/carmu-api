@@ -178,6 +178,11 @@ export default [
         name: 'Agregar Transacción',
         key: Permission.ADD_TRANSACTION,
       },
+      {
+        id: 7,
+        name: 'Eliminar Transacción',
+        key: Permission.DELETE_TRANSACTION,
+      },
     ],
   },
 ];

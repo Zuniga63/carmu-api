@@ -33,6 +33,7 @@ import { CreateCashboxDto } from './dto/create-cashbox.dto';
 import { CreateTransactionDto } from './dto/create-transation.dto';
 import { NewCashboxDto } from './dto/new-cashbox.dto';
 import { OpenBoxDto } from './dto/open-box.dto';
+import { TransactionDto } from './dto/transaction.dto';
 import { UpdateCashboxDto } from './dto/update-cashbox.dto';
 
 @Controller('cashboxes')
@@ -164,6 +165,10 @@ export class CashboxsController {
   @ApiOperation({
     summary: 'Add transaction to the cashbox',
   })
+  @ApiCreatedResponse({
+    description: 'The transaction was success create',
+    type: TransactionDto,
+  })
   addTransaction(
     @Param('id') id: string,
     @Body() createTransactionDto: CreateTransactionDto,
@@ -173,6 +178,30 @@ export class CashboxsController {
     return this.cashboxsService.addTransaction(
       id,
       createTransactionDto,
+      req.user as User
+    );
+  }
+  // ------------------------------------------------------------------------------------
+  // DELETE TRANSACTIONS
+  // ------------------------------------------------------------------------------------
+  @Delete(':boxId/transactions/:transactionId')
+  @RequirePermissions(Permission.DELETE_TRANSACTION)
+  @ApiOperation({
+    summary: 'Delete transaction to the cashbox',
+  })
+  @ApiOkResponse({
+    description: 'The transaction was success deleted',
+    type: TransactionDto,
+  })
+  deleteTransaction(
+    @Param('boxId') boxId: string,
+    @Param('transactionId') transactionId: string,
+    @Req() req: Request
+  ) {
+    if (!req.user) throw new UnauthorizedException();
+    return this.cashboxsService.deleteTransaction(
+      boxId,
+      transactionId,
       req.user as User
     );
   }

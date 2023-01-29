@@ -4,8 +4,10 @@ import { Cashbox } from './cashbox.schema';
 
 export type CashboxTransactionDocument = HydratedDocument<CashboxTransaction>;
 
-@Schema({ timestamps: true })
+@Schema({ timestamps: true, toObject: { virtuals: true } })
 export class CashboxTransaction {
+  id: string;
+
   @Prop({
     type: MongooseSchema.Types.ObjectId,
     ref: 'Cashbox',

@@ -340,4 +340,32 @@ export class CashboxsService {
 
     return transaction;
   }
+
+  async deleteTransaction(boxId: string, transactionId: string, user: User) {
+    // Get the cashbox and transaction
+    const filter = this.buildCashboxFilter(user, boxId);
+
+    const [cashbox, transaction] = await Promise.all([
+      this.cashboxModel
+        .findOne(filter)
+        .where('openBox')
+        .populate('transactions', 'id')
+        .ne(null),
+      this.transactionModel.findById(transactionId),
+    ]);
+    if (!transaction || !cashbox) throw new NotFoundException();
+
+    // Remove the transaction from cashbox
+    cashbox.transactions = cashbox.transactions.filter(
+      (boxTransaction) => boxTransaction.id !== transaction.id
+    );
+
+    // Delete transaction and update the cashbox
+    await Promise.all([
+      transaction.remove(),
+      cashbox.save({ validateBeforeSave: false }),
+    ]);
+
+    return transaction;
+  }
 }
