@@ -35,7 +35,7 @@ import { NewCashboxDto } from './dto/new-cashbox.dto';
 import { OpenBoxDto } from './dto/open-box.dto';
 import { UpdateCashboxDto } from './dto/update-cashbox.dto';
 
-@Controller('cashboxs')
+@Controller('cashboxes')
 @UseGuards(JwtAuthGuard, PermissionsGuards)
 @ApiTags('Cashboxs')
 @ApiBearerAuth()
