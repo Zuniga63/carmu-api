@@ -31,6 +31,7 @@ import { User } from '../users/schema/user.schema';
 import { CashboxsService } from './cashboxs.service';
 import CashboxWithAll from './dto/cashbox-with-all.dto';
 import { CashboxDto } from './dto/cashbox.dto';
+import { CloseBoxDto } from './dto/close-box.dto';
 import { CreateCashboxDto } from './dto/create-cashbox.dto';
 import { CreateTransactionDto } from './dto/create-transation.dto';
 import { NewCashboxDto } from './dto/new-cashbox.dto';
@@ -178,6 +179,32 @@ export class CashboxsController {
   ) {
     if (!req.user) throw new UnauthorizedException();
     return this.cashboxsService.openCashbox(id, openBoxDto, req.user as User);
+  }
+
+  // ------------------------------------------------------------------------------------
+  // CLOSE CASHBOX
+  // ------------------------------------------------------------------------------------
+  @Patch(':id/close-box')
+  @RequirePermissions(Permission.CLOSE_CASHBOX)
+  @ApiOperation({
+    summary: 'Close the current box',
+  })
+  @ApiOkResponse({ description: 'The box is close', type: CashboxDto })
+  @ApiNotFoundResponse({
+    description: 'The cashbox not found or out of service',
+  })
+  @ApiBadRequestResponse({
+    description:
+      'Some of the submitted field have not passed primary validation',
+    type: ValidationErrorDto,
+  })
+  closeCashbox(
+    @Param('id') id: string,
+    @Body() closeBoxDto: CloseBoxDto,
+    @Req() req: Request
+  ) {
+    if (!req.user) throw new UnauthorizedException();
+    return this.cashboxsService.closeCashbox(id, closeBoxDto, req.user as User);
   }
   // ------------------------------------------------------------------------------------
   // TRANSACTIONS

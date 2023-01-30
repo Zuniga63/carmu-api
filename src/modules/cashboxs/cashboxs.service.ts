@@ -7,6 +7,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import dayjs from 'dayjs';
 import { FilterQuery, isValidObjectId, Model, Types } from 'mongoose';
 import { User, UserDocument } from '../users/schema/user.schema';
+import { CloseBoxDto } from './dto/close-box.dto';
 import { CreateCashboxDto } from './dto/create-cashbox.dto';
 import { CreateTransactionDto } from './dto/create-transation.dto';
 import { OpenBoxDto } from './dto/open-box.dto';
@@ -268,6 +269,11 @@ export class CashboxsService {
       promises.push(boxUser.save({ validateBeforeSave: false }));
     });
 
+    await this.closingModel.updateMany(
+      { cashbox: cashbox.id },
+      { $set: { cashbox: undefined } }
+    );
+
     // delete the box
     promises.push(cashbox.remove());
 
@@ -296,6 +302,7 @@ export class CashboxsService {
     cashbox.openBox = dayjs().toDate();
     cashbox.cashier = user;
     cashbox.cashierName = user.name;
+    cashbox.closed = undefined;
 
     if (date && dayjs(date).isValid()) {
       const { closed } = cashbox;
@@ -306,6 +313,105 @@ export class CashboxsService {
     cashbox.depopulate('cashier');
 
     return cashbox;
+  }
+
+  async closeCashbox(id: string, closeBoxDto: CloseBoxDto, user: User) {
+    const { cash, observation } = closeBoxDto;
+    const filter = this.buildCashboxFilter(user, id);
+    const closeDate = dayjs().toDate();
+
+    // Get the cashbox
+    const cashbox = await this.cashboxModel
+      .findOne(filter)
+      .populate('cashier', 'name')
+      .where('openBox')
+      .ne(null);
+
+    if (!cashbox) throw new NotFoundException();
+
+    let incomes = 0;
+    let expenses = 0;
+    let balance = cashbox.base;
+    let leftover: number | undefined;
+    let missing: number | undefined;
+    const promises: Promise<any>[] = [];
+    const transactions = await this.transactionModel.find({
+      cashbox: cashbox.id,
+    });
+
+    transactions.forEach((transaction) => {
+      const { amount } = transaction;
+      transaction.cashbox = undefined;
+
+      if (amount > 0) incomes += amount;
+      else expenses += Math.abs(amount);
+
+      balance += amount;
+    });
+
+    if (balance > cash) {
+      missing = balance - cash;
+      const missingDescription = `Faltante de la caja ${
+        cashbox.name
+      } a cargo del cajero ${cashbox.cashier?.name || cashbox.cashierName}`;
+
+      const missingTransaction = new this.transactionModel({
+        transactionDate: closeDate,
+        description: missingDescription,
+        amount: missing * -1,
+      });
+
+      transactions.push(missingTransaction);
+    } else if (balance < cash) {
+      leftover = cash - balance;
+      const leftoverDescription = `Sobrante de la caja ${
+        cashbox.name
+      } a cargo del cajero ${cashbox.cashier?.name || cashbox.cashierName}`;
+
+      const letfoverTransaction = new this.transactionModel({
+        transactionDate: closeDate,
+        description: leftoverDescription,
+        amount: leftover,
+      });
+
+      transactions.push(letfoverTransaction);
+    }
+
+    const closing = new this.closingModel({
+      cashbox: cashbox.id,
+      user: user,
+      cashier: cashbox.cashier?.id,
+      username: user.name,
+      cashierName: cashbox.cashier?.name || cashbox.cashierName,
+      boxName: cashbox.name,
+      opened: cashbox.openBox,
+      closingDate: closeDate,
+      base: cashbox.base,
+      incomes: incomes > 0 ? incomes : undefined,
+      expenses: expenses > 0 ? expenses : undefined,
+      cash,
+      leftover,
+      missing,
+      transactions,
+      observation,
+    });
+
+    cashbox.cashier = undefined;
+    cashbox.base = 0;
+    cashbox.openBox = undefined;
+    cashbox.closed = closeDate;
+    cashbox.transactions = [];
+    cashbox.closingRecords.push(closing);
+
+    promises.push(cashbox.save({ validateBeforeSave: false }));
+    promises.push(
+      ...transactions.map((t) => t.save({ validateBeforeSave: false }))
+    );
+    promises.push(closing.save());
+
+    await Promise.all(promises);
+
+    return cashbox.depopulate('transactions');
   }
 
   async addTransaction(

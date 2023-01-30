@@ -175,11 +175,16 @@ export default [
       },
       {
         id: 6,
+        name: 'Cerrar caja',
+        key: Permission.CLOSE_CASHBOX,
+      },
+      {
+        id: 7,
         name: 'Agregar Transacción',
         key: Permission.ADD_TRANSACTION,
       },
       {
-        id: 7,
+        id: 8,
         name: 'Eliminar Transacción',
         key: Permission.DELETE_TRANSACTION,
       },
