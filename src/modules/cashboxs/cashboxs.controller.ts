@@ -19,8 +19,10 @@ import {
   ApiOkResponse,
   ApiOperation,
   ApiTags,
+  ApiUnprocessableEntityResponse,
 } from '@nestjs/swagger';
 import { Request } from 'express';
+import ValidationErrorDto from 'src/dto/validation-error.dto';
 import { RequirePermissions } from '../auth/decorators/required-permissions.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { PermissionsGuards } from '../auth/guards/permissions.guard';
@@ -58,6 +60,15 @@ export class CashboxsController {
   @ApiCreatedResponse({
     description: 'The cashbox has been successfully create',
     type: NewCashboxDto,
+  })
+  @ApiBadRequestResponse({
+    description:
+      'Some of the submitted field have not passed primary validation',
+    type: ValidationErrorDto,
+  })
+  @ApiUnprocessableEntityResponse({
+    description: 'Has not passed the validation for saving in the database',
+    type: ValidationErrorDto,
   })
   create(@Body() createCashboxDto: CreateCashboxDto, @Req() req: Request) {
     if (!req.user) throw new UnauthorizedException();
@@ -106,6 +117,15 @@ export class CashboxsController {
     description:
       'The cashbox was not found or you do not have access to update',
   })
+  @ApiBadRequestResponse({
+    description:
+      'Some of the submitted field have not passed primary validation',
+    type: ValidationErrorDto,
+  })
+  @ApiUnprocessableEntityResponse({
+    description: 'Has not passed the validation for saving in the database',
+    type: ValidationErrorDto,
+  })
   update(
     @Param('id') id: string,
     @Body() updateCashboxDto: UpdateCashboxDto,
@@ -146,6 +166,11 @@ export class CashboxsController {
   @ApiNotFoundResponse({
     description: 'The cashbox not found or already in operation',
   })
+  @ApiBadRequestResponse({
+    description:
+      'Some of the submitted field have not passed primary validation',
+    type: ValidationErrorDto,
+  })
   openCashbox(
     @Param('id') id: string,
     @Body() openBoxDto: OpenBoxDto,
@@ -168,6 +193,11 @@ export class CashboxsController {
   @ApiCreatedResponse({
     description: 'The transaction was success create',
     type: TransactionDto,
+  })
+  @ApiBadRequestResponse({
+    description:
+      'Some of the submitted field have not passed primary validation',
+    type: ValidationErrorDto,
   })
   addTransaction(
     @Param('id') id: string,
@@ -192,6 +222,10 @@ export class CashboxsController {
   @ApiOkResponse({
     description: 'The transaction was success deleted',
     type: TransactionDto,
+  })
+  @ApiNotFoundResponse({
+    description:
+      'The cashbox or transaction not found or dont has permission for deleted',
   })
   deleteTransaction(
     @Param('boxId') boxId: string,
