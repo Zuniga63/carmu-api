@@ -1,5 +1,4 @@
 import dayjs from 'dayjs';
-import timezone from 'dayjs/plugin/timezone';
 import { Request, Response } from 'express';
 import CashboxTransactionModel from 'src/models/CashboxTransaction.model';
 import { ShortMonths } from 'src/utils';
@@ -8,9 +7,6 @@ import SaleOperationModel from 'src/models/SaleOperation.model';
 import { CategoryHydrated, IDailyCreditEvolution, ISaleOperation, OperationType } from 'src/types';
 import AnnualReport from 'src/utils/reports/AnnualReport';
 import { FilterQuery } from 'mongoose';
-
-dayjs.extend(timezone);
-const tz = 'America/Bogota';
 
 export const cashReport = async (_req: Request, res: Response) => {
   interface ICashGroupResult {
@@ -141,7 +137,7 @@ export const cashReport = async (_req: Request, res: Response) => {
 // ----------------------------------------------------------------------------
 
 const getOperationSales = async (from: Date, to: Date, type: OperationType) => {
-  console.log('From:', dayjs().tz(tz).toDate());
+  console.log('From:', dayjs().toDate());
   const filter: FilterQuery<ISaleOperation> =
     type !== 'sale'
       ? { operationDate: { $gte: from, $lt: to }, operationType: type }
@@ -160,7 +156,7 @@ const isOperationType = (value: any): value is OperationType => {
 };
 
 const getAnnualReport = async (operationType: OperationType, year?: number): Promise<AnnualReport> => {
-  const now = dayjs().tz(tz);
+  const now = dayjs();
   let fromDate = now.startOf('year');
   let toDate = now.endOf('year');
 
@@ -188,7 +184,7 @@ export const annualReport = async (req: Request, res: Response) => {
 
 export const creditEvolution = async (_req: Request, res: Response) => {
   try {
-    const date = dayjs().tz(tz).startOf('year').toDate();
+    const date = dayjs().startOf('year').toDate();
     let initialBalance = 0;
 
     const initialSums = await SaleOperationModel.aggregate<{ credits: number; payments: number }>()
@@ -232,7 +228,7 @@ export const creditEvolution = async (_req: Request, res: Response) => {
 
     dailyResume.forEach(({ _id, credits, payments }) => {
       const { year, month, day } = _id;
-      const date = dayjs(`${year}-${month}-${day}`).tz(tz).startOf('day').toDate();
+      const date = dayjs(`${year}-${month}-${day}`).startOf('day').toDate();
       const balance = credits - payments;
 
       dailyReports.push({ date, credits, payments, balance });
