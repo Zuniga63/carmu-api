@@ -1,4 +1,4 @@
-import dayjs, { Dayjs } from 'dayjs';
+import dayjs from 'dayjs';
 import timezone from 'dayjs/plugin/timezone';
 import { Request, Response } from 'express';
 import CashboxTransactionModel from 'src/models/CashboxTransaction.model';
@@ -140,7 +140,7 @@ export const cashReport = async (_req: Request, res: Response) => {
 // ANNUAL REPORTS
 // ----------------------------------------------------------------------------
 
-const getOperationSales = async (from: Dayjs, to: Dayjs, type: OperationType) => {
+const getOperationSales = async (from: Date, to: Date, type: OperationType) => {
   const filter: FilterQuery<ISaleOperation> =
     type !== 'sale'
       ? { operationDate: { $gte: from, $lt: to }, operationType: type }
@@ -169,7 +169,7 @@ const getAnnualReport = async (operationType: OperationType, year?: number): Pro
     if (toDate.isAfter(now)) toDate = now.clone();
   }
 
-  const operations = await getOperationSales(fromDate, toDate, operationType);
+  const operations = await getOperationSales(fromDate.toDate(), toDate.toDate(), operationType);
   return new AnnualReport(fromDate.year(), fromDate, toDate, operations);
 };
 
