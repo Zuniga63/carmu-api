@@ -141,6 +141,7 @@ export const cashReport = async (_req: Request, res: Response) => {
 // ----------------------------------------------------------------------------
 
 const getOperationSales = async (from: Date, to: Date, type: OperationType) => {
+  console.log('From:', from);
   const filter: FilterQuery<ISaleOperation> =
     type !== 'sale'
       ? { operationDate: { $gte: from, $lt: to }, operationType: type }
