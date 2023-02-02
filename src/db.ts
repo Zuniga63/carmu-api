@@ -11,25 +11,14 @@ const connectionIsSuccessfully = (uri?: string): void => {
   if (process.env.APP_ENV === 'local' && uri) {
     const message = `Connection with mongoDB into url:${uri}`;
     console.log(message);
+  }else {
+    console.log('Connection to database is successfully');
   }
-};
-
-const getMongoUri = (): string => {
-  const env: string = process.env.APP_ENV || 'local';
-  let uri: string = process.env.DB_URL || '';
-
-  if (env === 'local') {
-    const host: string | undefined = process.env.DB_HOST;
-    const port: string | undefined = process.env.DB_PORT;
-    const db: string | undefined = process.env.DB_DATABASE;
-    uri = `${host}:${port}/${db}`;
-  }
-
-  return uri;
 };
 
 export async function connect(): Promise<void> {
-  const mongoUri = getMongoUri();
+  const mongoUri = process.env.DB_URL || '';
+  console.log(mongoUri, 'Foo');
 
   if (connection) {
     connectionIsSuccessfully(mongoUri);
