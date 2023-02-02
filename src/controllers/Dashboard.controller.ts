@@ -5,8 +5,9 @@ import CashboxTransactionModel from 'src/models/CashboxTransaction.model';
 import { ShortMonths } from 'src/utils';
 import sendError from 'src/utils/sendError';
 import SaleOperationModel from 'src/models/SaleOperation.model';
-import { CategoryHydrated, IDailyCreditEvolution, OperationType } from 'src/types';
+import { CategoryHydrated, IDailyCreditEvolution, ISaleOperation, OperationType } from 'src/types';
 import AnnualReport from 'src/utils/reports/AnnualReport';
+import { FilterQuery } from 'mongoose';
 
 dayjs.extend(timezone);
 const tz = 'America/Bogota';
@@ -140,10 +141,12 @@ export const cashReport = async (_req: Request, res: Response) => {
 // ----------------------------------------------------------------------------
 
 const getOperationSales = async (from: Dayjs, to: Dayjs, type: OperationType) => {
-  const result = await SaleOperationModel.find({
-    operationDate: { $gte: from, $lt: to },
-    operationType: type,
-  })
+  const filter: FilterQuery<ISaleOperation> =
+    type !== 'sale'
+      ? { operationDate: { $gte: from, $lt: to }, operationType: type }
+      : { operationDate: { $gte: from, $lt: to }, operationType: { $in: ['sale', 'separate_payment'] } };
+
+  const result = await SaleOperationModel.find(filter)
     .sort('operationDate')
     .populate<{ categories: CategoryHydrated[] }>('categories', 'mainCategory name level subcategories');
 
