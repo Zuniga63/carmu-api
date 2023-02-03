@@ -198,7 +198,7 @@ const buildPaymentsAndTransactions = async (invoice: InvoiceHydrated, cashPaymen
 
           const transaction = new CashboxTransactionModel({
             transactionDate: invoice.expeditionDate,
-            description: `Factura N° ${invoice.prefixNumber}: ${cashPayment.description}`,
+            description: `Factura N° ${invoice.prefixNumber} - ${invoice.customerName}: ${cashPayment.description}`,
             amount: cashPayment.amount,
           });
 
@@ -206,13 +206,14 @@ const buildPaymentsAndTransactions = async (invoice: InvoiceHydrated, cashPaymen
             cashbox = await CashboxModel.findById(cashPayment.cashboxId)
               .where('openBox')
               .ne(null)
-              .select('openBox transactions');
+              .select('openBox name transactions');
 
             if (cashbox) {
               const openBox = dayjs(cashbox.openBox);
               const tDate = dayjs(transaction.transactionDate);
               if (openBox.isValid() && tDate.isValid() && (openBox.isSame(tDate) || openBox.isBefore(tDate))) {
                 transaction.cashbox = cashbox._id;
+                transaction.description += ` [caja: ${cashbox.name}]`;
                 cashbox.transactions.push(transaction._id);
               }
             }
@@ -237,7 +238,7 @@ const buildPaymentsAndTransactions = async (invoice: InvoiceHydrated, cashPaymen
 };
 
 export const createSaleOperationDescription = (invoice: InvoiceHydrated, item: IInvoiceItem): string => {
-  return `Factura #:${invoice.prefixNumber} - ${invoice.customerName}: ${item.description} (${item.quantity} Und${
+  return `Factura N° ${invoice.prefixNumber} - ${invoice.customerName}: ${item.description} (${item.quantity} Und${
     item.quantity > 1 ? 's' : ''
   }.)`;
 };
@@ -547,6 +548,7 @@ export async function addPayment(req: Request, res: Response) {
         if (cashbox) {
           cashbox.transactions.push(transaction._id);
           transaction.cashbox = cashbox._id;
+          transaction.description += ` [caja: ${cashbox.name}]`;
         }
 
         info.transaction = transaction;
