@@ -80,7 +80,7 @@ const formData = (req: Request, _res: Response, next: NextFunction) => {
     else if (originalUrl.includes('option-sets')) preset = PRESETS.tag;
 
     options.upload_preset = preset;
-    options.resource_type = fileType;
+    options.resource_type = fileType as any;
     if (body.name) {
       const name = encodeURIComponent(createSlug(body.name));
       const id = nanoid(10);

@@ -12,7 +12,6 @@ export default async function adminAuth(req: Request, res: Response, next: NextF
     if (!user || (user && user.role && user.role !== 'admin')) throw new AuthError(message);
 
     req.user = user;
-    console.log('Paso el midleware de admin');
     next();
   } catch (error: any) {
     sendError(error, res);
