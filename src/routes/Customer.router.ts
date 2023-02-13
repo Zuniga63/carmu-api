@@ -83,7 +83,7 @@ router.route('/').post(controller.store);
  *              type: object
  *              properties:
  *                customer:
- *                  $ref: '#/components/schemas/customer'
+ *                  $ref: '#/components/schemas/customerWithInvoices'
  *      401:
  *        description: only auth users can acces the information
  *    security:
@@ -287,6 +287,5 @@ router.route('/:customerId/contacts/:contactId').delete(controller.removeContact
  *
  */
 router.route('/:customerId/add-credit-payment').post(controller.addPayment);
-router.route('/:customerId/payments').get(controller.getPayments);
 
 export default router;

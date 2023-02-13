@@ -6,19 +6,20 @@ export let connection: mongoose.Connection;
 // enabled virtual for all documents
 mongoose.set('toJSON', { virtuals: true });
 mongoose.set('toObject', { virtuals: true });
+mongoose.set('strictQuery', true);
 
 const connectionIsSuccessfully = (uri?: string): void => {
   if (process.env.APP_ENV === 'local' && uri) {
     const message = `Connection with mongoDB into url:${uri}`;
     console.log(message);
-  }else {
+  } else {
     console.log('Connection to database is successfully');
   }
 };
 
 export async function connect(): Promise<void> {
   const mongoUri = process.env.DB_URL || '';
-  console.log(mongoUri, 'Foo');
+  console.log(mongoUri);
 
   if (connection) {
     connectionIsSuccessfully(mongoUri);

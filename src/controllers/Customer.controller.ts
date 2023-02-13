@@ -1,7 +1,6 @@
 import dayjs from 'dayjs';
 import { Request, Response } from 'express';
 import { Types } from 'mongoose';
-import CashboxModel from 'src/models/Cashbox.model';
 import CashboxTransactionModel from 'src/models/CashboxTransaction.model';
 import CustomerModel from 'src/models/Customer.model';
 import InvoiceModel from 'src/models/Invoice.model';
@@ -55,7 +54,7 @@ interface PendingInvoiceGroup {
 export const list = async (_req: Request, res: Response) => {
   try {
     const customerModels = await CustomerModel.find({}).sort('firstName').sort('lastName');
-    const cashboxs = await CashboxModel.find({}).sort('name').where('openBox').ne(null).select('name openBox');
+    // const cashboxs = await CashboxModel.find({}).sort('name').where('openBox').ne(null).select('name openBox');
 
     const customers = customerModels.map((customer) => customer.toObject());
 
@@ -91,7 +90,7 @@ export const list = async (_req: Request, res: Response) => {
     });
     //
 
-    res.status(200).json({ customers, cashboxs });
+    res.status(200).json(customers);
   } catch (error) {
     sendError(error, res);
   }
@@ -100,8 +99,9 @@ export const list = async (_req: Request, res: Response) => {
 export const store = async (req: Request, res: Response) => {
   const contacts = getContacts(req.body.contacts);
   try {
+    console.log(req.body);
     const customer = await CustomerModel.create({ ...req.body, contacts });
-    res.status(201).json({ customer });
+    res.status(201).json(customer);
   } catch (error) {
     sendError(error, res);
   }
@@ -111,9 +111,25 @@ export const show = async (req: Request, res: Response) => {
   const { customerId } = req.params;
 
   try {
-    const customer = await CustomerModel.findById(customerId);
-    if (!customer) throw new NotFoundError('Cliente no encontrado.');
-    res.status(200).json({ customer });
+    const customerDocument = await CustomerModel.findById(customerId);
+    if (!customerDocument) throw new NotFoundError('Cliente no encontrado.');
+
+    const customer = customerDocument.toObject();
+    customer.balance = 0;
+    const invoices = await InvoiceModel.find({ customer: customer._id }).sort('expeditionDate');
+
+    invoices.forEach((inv) => {
+      const { balance } = inv;
+      if (customer.balance) {
+        customer.balance += balance || 0;
+      } else {
+        customer.balance = balance;
+      }
+    });
+
+    customer.invoices = invoices as any;
+
+    res.status(200).json(customer);
   } catch (error) {
     sendError(error, res);
   }
@@ -122,6 +138,7 @@ export const show = async (req: Request, res: Response) => {
 export const update = async (req: Request, res: Response) => {
   const { customerId } = req.params;
   const { firstName, lastName, alias, observation, email, address, documentType, documentNumber, birthDate } = req.body;
+  const contacts = getContacts(req.body.contacts);
 
   try {
     const customer = await CustomerModel.findById(customerId);
@@ -144,9 +161,17 @@ export const update = async (req: Request, res: Response) => {
       customer.documentNumber = undefined;
     }
 
+    if (contacts.length > 0) {
+      const ids = customer.contacts.map((item) => item._id);
+      ids.forEach((id) => {
+        customer.contacts.id(id)?.remove();
+      });
+      customer.contacts.push(...contacts);
+    }
+
     await customer.save({ validateModifiedOnly: true });
 
-    res.status(200).json({ customer });
+    res.status(200).json(customer);
   } catch (error) {
     sendError(error, res);
   }
@@ -333,41 +358,6 @@ export const addPayment = async (req: Request, res: Response) => {
     ]);
 
     res.status(200).json({ paymentReports });
-  } catch (error) {
-    sendError(error, res);
-  }
-};
-
-export const getPayments = async (req: Request, res: Response) => {
-  try {
-    const { customerId } = req.params;
-    const payments: IInvoicePayment[] = [];
-
-    const customer = await CustomerModel.findById(customerId);
-    if (!customer) throw new NotFoundError('Cliente no encontrado');
-
-    const invoices = await InvoiceModel.find({ customer: customer._id })
-      .where('credit')
-      .ne(null)
-      .sort('expeditionDate')
-      .select('expeditionDate payments');
-
-    invoices.forEach((invoice) => {
-      payments.push(...invoice.payments);
-    });
-
-    payments.sort((a, b) => {
-      const lastPayment = dayjs(a.paymentDate);
-      const currentPayment = dayjs(b.paymentDate);
-      let result = 0;
-
-      if (currentPayment.isBefore(lastPayment)) result = -1;
-      else if (currentPayment.isAfter(lastPayment)) result = 1;
-
-      return result;
-    });
-
-    res.status(200).json({ payments });
   } catch (error) {
     sendError(error, res);
   }
