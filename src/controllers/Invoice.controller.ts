@@ -21,7 +21,6 @@ import {
 import NotFoundError from 'src/utils/errors/NotFoundError';
 import sendError from 'src/utils/sendError';
 import ValidationError from 'src/utils/errors/ValidationError';
-import CategoryModel from 'src/models/Category.model';
 import ProductModel from 'src/models/Product.model';
 
 // ----------------------------------------------------------------------------
@@ -29,18 +28,15 @@ import ProductModel from 'src/models/Product.model';
 // ----------------------------------------------------------------------------
 export async function list(_req: Request, res: Response) {
   try {
-    const [invoices, customers, categories, products, cashboxs] = await Promise.all([
+    const [invoices, products] = await Promise.all([
       InvoiceModel.find({})
         .sort('expeditionDate')
         .select('-items -payments')
         .populate('customer', 'firstName lastName documentNumber'),
-      CustomerModel.find({}).sort('firstName').sort('lastName'),
-      CategoryModel.find({}).where('mainCategory').equals(null).sort('name').select('mainCategory name'),
       ProductModel.find({}).sort('name').select('-images -isInventoriable -sold -returned'),
-      CashboxModel.find({}).sort('name').where('openBox').ne(null).select('name openBox'),
     ]);
 
-    res.status(200).json({ invoices, customers, categories, products, cashboxs });
+    res.status(200).json({ invoices, products });
   } catch (error) {
     sendError(error, res);
   }
