@@ -15,9 +15,4 @@ const schema = new Schema<ISaleOperation>({
   description: String,
 });
 
-schema.pre('save', function preSave(next) {
-  this.amount = Math.abs(this.amount);
-  next();
-});
-
 export default model<ISaleOperation>('SaleOperation', schema);

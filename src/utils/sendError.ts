@@ -8,6 +8,7 @@ export default function sendError(error: any, res: Response) {
 
   switch (errorName) {
     case 'CashboxError':
+    case 'BadRequest':
     case 'InvalidSignInError':
       code = 400;
       break;

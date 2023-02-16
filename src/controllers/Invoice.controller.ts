@@ -15,6 +15,7 @@ import {
   IInvoiceItem,
   IInvoicePayment,
   InvoiceHydrated,
+  OperationType,
   ProductHydrated,
   UserModelHydrated,
 } from 'src/types';
@@ -527,7 +528,7 @@ export async function addPayment(req: Request, res: Response) {
 
       // Update the invoice balance
       invoice.balance = invoice.balance - paymentAmount || undefined;
-      if (invoice.isSeparate) invoice.isSeparate = Boolean(invoice.balance); // Change this state
+      // if (invoice.isSeparate) invoice.isSeparate = Boolean(invoice.balance); // Change this state
       info.message = invoice.balance ? '¡Abono realizado con éxito!' : '¡Factura pagada!';
 
       // Register transaction in global or cashbox
@@ -564,6 +565,197 @@ export async function addPayment(req: Request, res: Response) {
     }
 
     res.status(200).json({ ...info });
+  } catch (error) {
+    sendError(error, res);
+  }
+}
+
+export async function cancelPayment(req: Request, res: Response) {
+  const { invoiceId, paymentId } = req.params;
+  const { registerTransaction, cashboxId, message } = req.body;
+  const transactions: CashboxTransactionHydrated[] = [];
+  const boxes: CashboxHydrated[] = [];
+  const saleRecords: HydratedSaleOperation[] = [];
+
+  // By default invoice is a sale
+  let cancelAmount = 0;
+  let isSeparate = false;
+  let isCredit = false;
+  let errorMessage: string | undefined;
+
+  try {
+    // Get the invoice to cancel payment
+    const invoice = await InvoiceModel.findById(invoiceId);
+    if (!invoice) throw new NotFoundError('Factura no encontrada');
+
+    // Get the payment to cancel
+    const payment = invoice.payments.id(paymentId);
+    if (!payment) throw new NotFoundError('Pago no encotrado');
+
+    if (payment.cancel) {
+      errorMessage = 'Este pago ya ha sido cancelado';
+    }
+
+    if (payment.initialPayment) {
+      errorMessage = 'Los pagos iniciales no se pueden anular';
+    }
+
+    if (errorMessage) {
+      const error = new Error(errorMessage);
+      error.name = 'BadRequest';
+      throw error;
+    }
+
+    // Define if the invoice is credit or separate or neither
+    isSeparate = invoice.isSeparate;
+    if (!isSeparate) {
+      isCredit = Boolean(invoice.balance) || !invoice.cash || invoice.cash < invoice.amount;
+    }
+
+    cancelAmount = payment.amount;
+    payment.cancel = true;
+    payment.cancelMessage = typeof message === 'string' ? message : undefined;
+    invoice.balance = (invoice.balance || 0) + cancelAmount;
+    invoice.markModified('payments');
+
+    if (registerTransaction) {
+      const transaction = new CashboxTransactionModel({
+        transactionDate: payment.paymentDate,
+        description: `Factura N° ${invoice.prefixNumber}: Anulación de pago - ${invoice.customerName}`,
+        amount: cancelAmount * -1,
+      });
+
+      if (cashboxId && isValidObjectId(cashboxId)) {
+        const cashbox = await CashboxModel.findById(cashboxId);
+        if (cashbox && cashbox.openBox && dayjs(cashbox.openBox).isBefore(payment.paymentDate)) {
+          cashbox.transactions.push(transaction._id);
+          transaction.cashbox = cashbox._id;
+          boxes.push(cashbox);
+        }
+      }
+
+      transactions.push(transaction);
+    }
+
+    for (let itemIndex = invoice.items.length - 1; itemIndex >= 0; itemIndex -= 1) {
+      const item = invoice.items[itemIndex];
+      let saleRecordAmount: number | undefined;
+
+      if (item.balance) {
+        const diff = item.amount - item.balance;
+        if (diff > 0) {
+          if (diff > cancelAmount) {
+            item.balance += cancelAmount;
+            saleRecordAmount = cancelAmount;
+            cancelAmount = 0;
+          } else {
+            item.balance += diff;
+            saleRecordAmount = diff;
+            cancelAmount -= diff;
+          }
+        }
+      } else {
+        if (item.amount > cancelAmount) {
+          item.balance = cancelAmount;
+          saleRecordAmount = cancelAmount;
+          cancelAmount = 0;
+        } else {
+          item.balance = item.amount;
+          saleRecordAmount = item.amount;
+          cancelAmount -= item.amount;
+        }
+      }
+
+      if (saleRecordAmount) {
+        let recordType: OperationType = 'sale';
+        if (isSeparate) recordType = 'separate_payment';
+        else if (isCredit) recordType = 'credit_payment';
+
+        saleRecords.push(
+          new SaleOperationModel({
+            operationDate: payment.paymentDate,
+            categories: item.categories,
+            operationType: recordType,
+            amount: saleRecordAmount * -1,
+            description: `Factura N° ${invoice.prefixNumber}: Anulación de pago del articulo ${item.description}`,
+          }),
+        );
+
+        // ! The following code may be unnecesary
+        if (recordType === 'sale') {
+          saleRecords.push(
+            new SaleOperationModel({
+              operationDate: payment.paymentDate,
+              categories: item.categories,
+              operationType: 'credit',
+              amount: saleRecordAmount,
+              description: `Factura N°${invoice.prefixNumber}: Credito producto de anulación de una venta para el arrticulo ${item.description}`,
+            }),
+          );
+        }
+      }
+
+      if (cancelAmount <= 0) break;
+    }
+
+    await Promise.all([
+      invoice.save({ validateModifiedOnly: true }),
+      ...transactions.map((t) => t.save()),
+      ...boxes.map((box) => box.save({ validateModifiedOnly: true })),
+      ...saleRecords.map((sOp) => sOp.save()),
+    ]);
+
+    res.status(200).json(invoice);
+  } catch (error) {
+    sendError(error, res);
+  }
+}
+
+export async function cancelInvoice(req: Request, res: Response) {
+  const { invoiceId } = req.params;
+  const { message } = req.body;
+
+  try {
+    const invoice = await InvoiceModel.findById(invoiceId);
+    if (!invoice) throw new NotFoundError('Factura no encontrada');
+    if (invoice.cancel) {
+      const error = new Error('Está factura ya está cancelada');
+      error.name = 'BadRequest';
+      throw error;
+    }
+
+    invoice.cancel = true;
+    invoice.cancelMessage = message;
+
+    invoice.items.forEach((item) => {
+      item.cancel = true;
+      item.cancelMessage = message;
+    });
+
+    invoice.payments.forEach((payment) => {
+      payment.cancel = true;
+      payment.cancelMessage = message;
+    });
+
+    invoice.markModified('items');
+    invoice.markModified('payments');
+
+    await invoice.save();
+
+    await Promise.all([
+      invoice.save(),
+      SaleOperationModel.deleteMany({ description: { $regex: `.*${invoice.prefixNumber}.*` } }),
+      CashboxTransactionModel.deleteMany({
+        description: { $regex: `.*N° ${invoice.prefixNumber}.*` },
+      }),
+    ]);
+
+    await SaleOperationModel.deleteMany({ description: { $regex: `.*${invoice.prefixNumber}.*` } });
+    await CashboxTransactionModel.deleteMany({
+      description: { $regex: `.*N° ${invoice.prefixNumber}.*` },
+    });
+
+    res.status(200).json(invoice);
   } catch (error) {
     sendError(error, res);
   }

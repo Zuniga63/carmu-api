@@ -174,5 +174,7 @@ router.route('/:invoiceId').get(controller.show);
  *
  */
 router.route('/:invoiceId/add-payment').post(controller.addPayment);
+router.route('/:invoiceId/payments/:paymentId/cancel-payment').put(controller.cancelPayment);
+router.route('/:invoiceId/cancel').put(controller.cancelInvoice);
 
 export default router;
