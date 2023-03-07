@@ -59,25 +59,53 @@ interface ICashPayment {
  * @param data Request data
  */
 const setInvoiceCustomer = async (invoice: InvoiceHydrated, data: any) => {
-  const { customerId, customerName, customerAddress, customerPhone, customerDocument, customerDocumentType } = data;
-  const customer = await CustomerModel.findById(customerId);
+  const {
+    customerId,
+    customerName,
+    customerAddress,
+    customerPhone,
+    customerDocument,
+    customerDocumentType,
+    registerWithOtherCustomerData,
+  } = data;
 
-  // Customer data in the invoice
-  if (customer) {
-    invoice.customer = customer._id;
-    invoice.customerName = customer.fullName;
-    invoice.customerAddress = customer.address;
-    invoice.customerDocument = customer.documentNumber;
-    invoice.customerDocumentType = customer.documentType;
-    if (customer.contacts.length) invoice.customerPhone = customer.contacts[0].phone;
-  }
-
-  // Complete the missing data
+  // Save the customer data
   if (invoice.customerName === 'Mostrador' && customerName) invoice.customerName = customerName;
   invoice.customerAddress ??= customerAddress;
   invoice.customerDocument ??= customerDocument;
   invoice.customerDocumentType ??= customerDocumentType;
   invoice.customerPhone ??= customerPhone;
+
+  if (customerId && isValidObjectId(customerId)) {
+    const customer = await CustomerModel.findById(customerId);
+    if (customer) {
+      invoice.customer = customer._id;
+      if (!registerWithOtherCustomerData) {
+        invoice.customerName = customer.fullName;
+        invoice.customerAddress = customer.address;
+        invoice.customerDocument = customer.documentNumber;
+        invoice.customerDocumentType = customer.documentType;
+        if (customer.contacts.length) invoice.customerPhone = customer.contacts[0].phone;
+      }
+    }
+  }
+
+  if (!invoice.customer && customerName && customerDocument && customerDocumentType) {
+    const customerExists = await CustomerModel.exists({ documentNumber: customerDocument });
+    if (customerExists) {
+      invoice.customer = customerExists._id;
+    } else {
+      const newCustomer = await CustomerModel.create({
+        firstName: customerName,
+        documentNumber: customerDocument,
+        documentType: customerDocumentType,
+        address: customerAddress,
+        contacts: customerPhone ? [{ description: 'Telefono', phone: customerPhone }] : [],
+      });
+
+      invoice.customer = newCustomer._id;
+    }
+  }
 };
 
 const setInvoiceSeller = async (invoice: InvoiceHydrated, data: any, user?: UserModelHydrated) => {

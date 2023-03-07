@@ -254,6 +254,10 @@ const schema: { [key: string]: Reference | Schema } = {
           },
         },
       },
+      registerWithOtherData: {
+        type: 'boolean',
+        example: false,
+      },
     },
   },
   addInvoicePayment: {
