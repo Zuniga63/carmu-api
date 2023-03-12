@@ -104,13 +104,13 @@ export const cashReport = async (_req: Request, res: Response) => {
       .sort('transactionDate')
       .match({ transactionDate: { $gte: startYear, $lte: endYear } })
       .project({
-        date: {
-          $dateSubtract: {
-            startDate: '$transactionDate',
-            unit: 'hour',
-            amount: 5,
-          },
-        },
+        // date: {
+        //   $dateSubtract: {
+        //     startDate: '$transactionDate',
+        //     unit: 'hour',
+        //     amount: 5,
+        //   },
+        // },
         amount: true,
       })
       .group({
