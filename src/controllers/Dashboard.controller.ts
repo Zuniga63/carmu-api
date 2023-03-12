@@ -104,7 +104,7 @@ export const cashReport = async (_req: Request, res: Response) => {
       .sort('transactionDate')
       .match({ transactionDate: { $gte: startYear, $lte: endYear } })
       .group({
-        _id: { month: { $month: '$date' }, year: { $year: '$date' } },
+        _id: { month: { $month: '$transactionDate' }, year: { $year: '$transactionDate' } },
         incomes: {
           $sum: { $cond: [{ $gt: ['$amount', 0] }, '$amount', 0] },
         },
@@ -113,6 +113,8 @@ export const cashReport = async (_req: Request, res: Response) => {
         },
         balance: { $sum: '$amount' },
       });
+
+    console.log(result);
 
     const reports = buildCashReport(result);
 
