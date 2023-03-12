@@ -103,16 +103,6 @@ export const cashReport = async (_req: Request, res: Response) => {
     const result = await CashboxTransactionModel.aggregate<ICashGroupResult>()
       .sort('transactionDate')
       .match({ transactionDate: { $gte: startYear, $lte: endYear } })
-      .project({
-        // date: {
-        //   $dateSubtract: {
-        //     startDate: '$transactionDate',
-        //     unit: 'hour',
-        //     amount: 5,
-        //   },
-        // },
-        amount: true,
-      })
       .group({
         _id: { month: { $month: '$date' }, year: { $year: '$date' } },
         incomes: {
