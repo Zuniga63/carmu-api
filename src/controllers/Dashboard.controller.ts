@@ -8,96 +8,108 @@ import { CategoryHydrated, IDailyCreditEvolution, ISaleOperation, OperationType 
 import AnnualReport from 'src/utils/reports/AnnualReport';
 import { FilterQuery } from 'mongoose';
 
-export const cashReport = async (_req: Request, res: Response) => {
-  interface ICashGroupResult {
-    _id: { month: number; year: number };
-    incomes: number;
-    expenses: number;
-    balance: number;
-  }
+interface ICashGroupResult {
+  _id: { month: number; year: number };
+  incomes: number;
+  expenses: number;
+  balance: number;
+}
 
-  interface ICashMonthReport {
-    month: string;
-    year: number;
-    incomes: number | null;
-    averageIncomes: number | null;
-    annualAverageIncomes: number;
-    sumIncomes: number;
-    expenses: number | null;
-    averageExpenses: number | null;
-    annualAverageExpenses: number;
-    sumExpenses: number;
-    balance: number | null;
-    sumBalance: number;
-  }
+interface ICashMonthReport {
+  month: string;
+  year: number;
+  incomes: number | null;
+  averageIncomes: number | null;
+  annualAverageIncomes: number;
+  sumIncomes: number;
+  expenses: number | null;
+  averageExpenses: number | null;
+  annualAverageExpenses: number;
+  sumExpenses: number;
+  balance: number | null;
+  sumBalance: number;
+}
 
-  const buildCashReport = (data: ICashGroupResult[], year = dayjs().year()): ICashMonthReport[] => {
-    const reports: ICashMonthReport[] = [];
+const buildCashReport = (data: ICashGroupResult[]): ICashMonthReport[] => {
+  const reports: ICashMonthReport[] = [];
 
-    let sumIncomes = 0;
-    let incomeCount = 0;
-    let averageIncomes: number | null = null;
-    let annualAverageIncomes = 0;
+  let sumIncomes = 0;
+  let incomeCount = 0;
+  let averageIncomes: number | null = null;
+  let annualAverageIncomes = 0;
 
-    let sumExpenses = 0;
-    let annualAverageExpenses = 0;
-    let averageExpenses: number | null = null;
-    let expenseCount = 0;
+  let sumExpenses = 0;
+  let annualAverageExpenses = 0;
+  let averageExpenses: number | null = null;
+  let expenseCount = 0;
 
-    let sumBalance = 0;
+  let sumBalance = 0;
 
-    for (let monthIndex = 1; monthIndex <= 12; monthIndex++) {
-      const month = ShortMonths[monthIndex];
-      let incomes: number | null = null;
-      let expenses: number | null = null;
-      let balance: number | null = null;
+  let date = dayjs().subtract(11, 'month').startOf('month');
+  let monthCount = 0;
+  const today = dayjs();
 
-      const reportData = data.find((item) => item._id.month === monthIndex && item._id.year === year);
-      if (reportData) {
-        if (reportData.incomes) {
-          incomes = reportData.incomes;
-          sumIncomes += incomes;
+  while (today.isAfter(date)) {
+    const month = date.month() + 1;
+    const year = date.year();
+    const monthName = ShortMonths[month];
+    console.log(monthName, month);
 
-          incomeCount += 1;
-          averageIncomes = sumIncomes / incomeCount;
-        }
-        if (reportData.expenses) {
-          expenses = reportData.expenses * -1;
-          sumExpenses += expenses;
+    monthCount += 1;
 
-          expenseCount += 1;
-          averageExpenses = sumExpenses / expenseCount;
-        }
+    let incomes: number | null = null;
+    let expenses: number | null = null;
+    let balance: number | null = null;
 
-        balance = reportData.balance;
-        sumBalance += balance;
+    const reportData = data.find(({ _id }) => _id.month === month && _id.year === year);
+    if (reportData) {
+      if (reportData.incomes) {
+        incomes = reportData.incomes;
+        sumIncomes += incomes;
+
+        incomeCount += 1;
+        averageIncomes = sumIncomes / incomeCount;
+      }
+      if (reportData.expenses) {
+        expenses = reportData.expenses * -1;
+        sumExpenses += expenses;
+
+        expenseCount += 1;
+        averageExpenses = sumExpenses / expenseCount;
       }
 
-      annualAverageIncomes = sumIncomes / monthIndex;
-      annualAverageExpenses = sumExpenses / monthIndex;
-
-      reports.push({
-        month,
-        year,
-        incomes,
-        averageIncomes,
-        annualAverageIncomes,
-        sumIncomes,
-        expenses,
-        averageExpenses,
-        annualAverageExpenses,
-        sumExpenses,
-        balance,
-        sumBalance,
-      });
+      balance = reportData.balance;
+      sumBalance += balance;
     }
 
-    return reports;
-  };
+    annualAverageIncomes = sumIncomes / monthCount;
+    annualAverageExpenses = sumExpenses / monthCount;
 
+    reports.push({
+      month: monthName,
+      year,
+      incomes,
+      averageIncomes,
+      annualAverageIncomes,
+      sumIncomes,
+      expenses,
+      averageExpenses,
+      annualAverageExpenses,
+      sumExpenses,
+      balance,
+      sumBalance,
+    });
+
+    date = date.add(1, 'month');
+  }
+
+  return reports;
+};
+
+export const cashReport = async (_req: Request, res: Response) => {
   try {
     const now = dayjs();
-    const startYear = now.clone().startOf('year').toDate();
+    const startYear = now.subtract(1, 'year').toDate();
     const endYear = now.clone().endOf('year').toDate();
 
     const result = await CashboxTransactionModel.aggregate<ICashGroupResult>()
@@ -113,8 +125,6 @@ export const cashReport = async (_req: Request, res: Response) => {
         },
         balance: { $sum: '$amount' },
       });
-
-    console.log(result);
 
     const reports = buildCashReport(result);
 
