@@ -27,23 +27,23 @@ interface ICashMonthReport {
   annualAverageExpenses: number;
   sumExpenses: number;
   balance: number | null;
-  sumBalance: number;
+  globalBalance: number;
 }
 
 const buildCashReport = (data: ICashGroupResult[]): ICashMonthReport[] => {
   const reports: ICashMonthReport[] = [];
 
   let sumIncomes = 0;
-  let incomeCount = 0;
+  let incomeCount = 0; // For calculate average
   let averageIncomes: number | null = null;
   let annualAverageIncomes = 0;
 
   let sumExpenses = 0;
-  let annualAverageExpenses = 0;
+  let expenseCount = 0; // For calculate average
   let averageExpenses: number | null = null;
-  let expenseCount = 0;
+  let annualAverageExpenses = 0;
 
-  let sumBalance = 0;
+  let globalBalance = 0;
 
   let date = dayjs().subtract(11, 'month').startOf('month');
   let monthCount = 0;
@@ -53,7 +53,6 @@ const buildCashReport = (data: ICashGroupResult[]): ICashMonthReport[] => {
     const month = date.month() + 1;
     const year = date.year();
     const monthName = ShortMonths[month];
-    console.log(monthName, month);
 
     monthCount += 1;
 
@@ -61,25 +60,26 @@ const buildCashReport = (data: ICashGroupResult[]): ICashMonthReport[] => {
     let expenses: number | null = null;
     let balance: number | null = null;
 
-    const reportData = data.find(({ _id }) => _id.month === month && _id.year === year);
-    if (reportData) {
-      if (reportData.incomes) {
-        incomes = reportData.incomes;
+    const monthReport = data.find(({ _id }) => _id.month === month && _id.year === year);
+    if (monthReport) {
+      if (monthReport.incomes) {
+        incomes = monthReport.incomes;
         sumIncomes += incomes;
 
         incomeCount += 1;
         averageIncomes = sumIncomes / incomeCount;
       }
-      if (reportData.expenses) {
-        expenses = reportData.expenses * -1;
+
+      if (monthReport.expenses) {
+        expenses = monthReport.expenses * -1;
         sumExpenses += expenses;
 
         expenseCount += 1;
         averageExpenses = sumExpenses / expenseCount;
       }
 
-      balance = reportData.balance;
-      sumBalance += balance;
+      balance = monthReport.balance;
+      globalBalance += balance;
     }
 
     annualAverageIncomes = sumIncomes / monthCount;
@@ -97,7 +97,7 @@ const buildCashReport = (data: ICashGroupResult[]): ICashMonthReport[] => {
       annualAverageExpenses,
       sumExpenses,
       balance,
-      sumBalance,
+      globalBalance,
     });
 
     date = date.add(1, 'month');
@@ -108,13 +108,12 @@ const buildCashReport = (data: ICashGroupResult[]): ICashMonthReport[] => {
 
 export const cashReport = async (_req: Request, res: Response) => {
   try {
-    const now = dayjs();
-    const startYear = now.subtract(1, 'year').toDate();
-    const endYear = now.clone().endOf('year').toDate();
+    const today = dayjs().toDate();
+    const startYear = dayjs().subtract(1, 'year').toDate();
 
     const result = await CashboxTransactionModel.aggregate<ICashGroupResult>()
       .sort('transactionDate')
-      .match({ transactionDate: { $gte: startYear, $lte: endYear } })
+      .match({ transactionDate: { $gte: startYear, $lte: today } })
       .group({
         _id: { month: { $month: '$transactionDate' }, year: { $year: '$transactionDate' } },
         incomes: {
