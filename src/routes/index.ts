@@ -11,6 +11,7 @@ import CustomerRouter from './Customer.router';
 import ProductRouter from './Product.router';
 import InvoiceRouter from './Invoice.router';
 import SaleHistoryRouter from './SaleHistory.router';
+import StoreRouter from './Store.router';
 
 const rootRouter = Router();
 
@@ -23,5 +24,6 @@ rootRouter.use('/customers', userAuth, CustomerRouter);
 rootRouter.use('/products', ProductRouter);
 rootRouter.use('/invoices', userAuth, InvoiceRouter);
 rootRouter.use('/sale-history', SaleHistoryRouter);
+rootRouter.use('/stores', StoreRouter);
 
 export default rootRouter;

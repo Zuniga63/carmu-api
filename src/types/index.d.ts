@@ -234,6 +234,7 @@ export interface IInvoicePayment {
 export interface IInvoice {
   seller?: Types.ObjectId;
   customer?: Types.ObjectId;
+  premiseStore?: Types.ObjectId;
   isSeparate: boolean;
   prefix?: string;
   number?: number;

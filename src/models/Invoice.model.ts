@@ -81,6 +81,7 @@ const invoiceSchema = new Schema<IInvoice, InvoiceModelType>(
   {
     seller: { type: Schema.Types.ObjectId, ref: 'User' },
     customer: { type: Schema.Types.ObjectId, ref: 'Customer' },
+    premiseStore: { type: Schema.Types.ObjectId, ref: 'Store' },
     isSeparate: { type: Boolean, default: false },
     prefix: String,
     number: Number,

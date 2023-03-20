@@ -23,6 +23,10 @@ import NotFoundError from 'src/utils/errors/NotFoundError';
 import sendError from 'src/utils/sendError';
 import ValidationError from 'src/utils/errors/ValidationError';
 import ProductModel from 'src/models/Product.model';
+import StoreModel, { StoreDocument } from 'src/models/Store.model';
+
+const PREMISE_STORE_POPULATE = '-invoices -defaultBox';
+const CUSTOMER_POPULATE = 'firstName lastName documentNumber';
 
 // ----------------------------------------------------------------------------
 // GET: /invoices
@@ -33,7 +37,8 @@ export async function list(_req: Request, res: Response) {
       InvoiceModel.find({})
         .sort('expeditionDate')
         .select('-items -payments')
-        .populate('customer', 'firstName lastName documentNumber'),
+        .populate('customer', CUSTOMER_POPULATE)
+        .populate('premiseStore', PREMISE_STORE_POPULATE),
       ProductModel.find({}).sort('name').select('-images -isInventoriable -sold -returned'),
     ]);
 
@@ -325,16 +330,27 @@ const updateProductStocks = async ({ items }: InvoiceHydrated) => {
 
 export async function store(req: Request, res: Response) {
   const data = req.body;
-  const { cashPayments, isSeparate } = data;
+  const { cashPayments, isSeparate, premiseStoreId } = data;
+  let premiseStore: StoreDocument | null = null;
 
   try {
-    const invoice = new InvoiceModel({ items: data.items, cash: data.cash, isSeparate });
+    if (premiseStoreId && isValidObjectId(premiseStoreId)) {
+      premiseStore = await StoreModel.findById(premiseStoreId);
+    }
+
+    const invoice = new InvoiceModel({
+      premiseStore: premiseStore?._id,
+      items: data.items,
+      cash: data.cash,
+      isSeparate,
+    });
 
     setInvoiceDates(invoice, data);
     await setInvoiceCustomer(invoice, data);
     await setInvoiceSeller(invoice, data, req.user);
 
     await invoice.save();
+    if (premiseStore) premiseStore.invoices.push(invoice._id);
 
     const { payments, cashboxs, transactions } = await buildPaymentsAndTransactions(invoice, cashPayments);
     const saleOperations = buildSaleOperations(invoice);
@@ -347,9 +363,14 @@ export async function store(req: Request, res: Response) {
       ...saleOperations.map((sOp) => sOp.save()),
       ...products.map((p) => p.save({ validateBeforeSave: false })),
       invoice.save(),
+      premiseStore?.save(),
     ]);
 
-    const result = await invoice.populate('customer', 'firstName lastName documentNumber');
+    // const result = await invoice.populate('customer', 'firstName lastName documentNumber');
+    const result = await invoice.populate([
+      { path: 'customer', select: CUSTOMER_POPULATE },
+      { path: 'premiseStore', select: PREMISE_STORE_POPULATE },
+    ]);
 
     res.status(201).json({ invoice: result });
   } catch (error) {
