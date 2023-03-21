@@ -133,12 +133,10 @@ invoiceSchema.pre('save', async function preSave(next) {
 
     items.forEach((item) => {
       // Set subtotal and discount
-      // let itemBalance = item.quantity * item.unitValue;
       invoice.subtotal += item.quantity * item.unitValue;
 
       if (item.discount) {
         const discount = item.quantity * item.discount;
-        // itemBalance -= totalItemDiscount;
         if (invoice.discount) invoice.discount += discount;
         else invoice.discount = discount;
       }
@@ -147,15 +145,9 @@ invoiceSchema.pre('save', async function preSave(next) {
         if (cashSurplus >= item.balance) {
           cashSurplus -= item.balance;
           item.balance = undefined;
-          // invoiceCash -= itemBalance;
-          // itemBalance = 0;
-          // item.balance = undefined;
         } else {
           item.balance -= cashSurplus;
           cashSurplus = 0;
-          // itemBalance -= invoiceCash;
-          // invoiceCash = 0;
-          // item.balance = itemBalance;
         }
       }
 
