@@ -287,6 +287,8 @@ const getCustomerCredits = (customerId: string) => {
   return InvoiceModel.find({ customer: customerId })
     .where('isSeparate')
     .ne(true)
+    .where('cancel')
+    .ne(true)
     .where('balance')
     .gt(0)
     .sort('expeditionDate');
