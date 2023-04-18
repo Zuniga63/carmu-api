@@ -788,8 +788,7 @@ export async function cancelInvoice(req: Request, res: Response) {
 
     invoice.markModified('items');
     invoice.markModified('payments');
-
-    await invoice.save();
+    invoice.balance = undefined;
 
     await Promise.all([
       invoice.save(),
@@ -798,11 +797,6 @@ export async function cancelInvoice(req: Request, res: Response) {
         description: { $regex: `.*N° ${invoice.prefixNumber}.*` },
       }),
     ]);
-
-    await SaleOperationModel.deleteMany({ description: { $regex: `.*${invoice.prefixNumber}.*` } });
-    await CashboxTransactionModel.deleteMany({
-      description: { $regex: `.*N° ${invoice.prefixNumber}.*` },
-    });
 
     res.status(200).json(invoice);
   } catch (error) {

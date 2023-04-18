@@ -6,6 +6,8 @@ export interface IStoreModel {
   phone?: string;
   defaultBox?: Types.ObjectId;
   invoices: Types.ObjectId[];
+  weeklySales?: number;
+  monthlySales?: number;
 }
 
 export type StoreDocument = HydratedDocument<IStoreModel>;
