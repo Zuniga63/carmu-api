@@ -36,7 +36,7 @@ export async function list(_req: Request, res: Response) {
     const [invoices, products] = await Promise.all([
       InvoiceModel.find({})
         .sort('expeditionDate')
-        .select('-items -payments')
+        .select('-payments')
         .populate('customer', CUSTOMER_POPULATE)
         .populate('premiseStore', PREMISE_STORE_POPULATE),
       ProductModel.find({}).sort('name').select('-images -isInventoriable -sold -returned'),
