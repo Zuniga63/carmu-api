@@ -1,6 +1,6 @@
 import dayjs from 'dayjs';
 import { Request, Response } from 'express';
-import { isValidObjectId, Promise } from 'mongoose';
+import { isValidObjectId, FilterQuery } from 'mongoose';
 import CashboxModel from 'src/models/Cashbox.model';
 import CashboxTransactionModel from 'src/models/CashboxTransaction.model';
 import CustomerModel from 'src/models/Customer.model';
@@ -12,6 +12,7 @@ import {
   CashboxTransactionHydrated,
   HydratedCustomer,
   HydratedSaleOperation,
+  IInvoice,
   IInvoiceItem,
   IInvoicePayment,
   InvoiceHydrated,
@@ -31,16 +32,41 @@ const CUSTOMER_POPULATE = 'firstName lastName documentNumber';
 // ----------------------------------------------------------------------------
 // GET: /invoices
 // ----------------------------------------------------------------------------
-export async function list(_req: Request, res: Response) {
+export async function list(req: Request, res: Response) {
+  const { from, to, withItems, withPayments, withProducts, refresh } = req.query;
+  const filter: FilterQuery<IInvoice & { createdAt: string }> = {};
+
+  if (from && typeof from === 'string' && dayjs(from).isValid()) {
+    const date = dayjs(from).toDate();
+    filter.expeditionDate = { $gte: date };
+  }
+
+  if (to && typeof to === 'string' && dayjs(to).isValid()) {
+    const date = dayjs(to).toDate();
+    filter.expeditionDate = { $lte: date };
+  }
+
+  if (refresh === 'true') {
+    const date = dayjs().subtract(1, 'day').startOf('day').toDate();
+    filter.createdAt = { $gte: date };
+  }
+
+  const invoiceQuery = InvoiceModel.find(filter)
+    .sort('expeditionDate')
+    .populate('customer', CUSTOMER_POPULATE)
+    .select('-payments -items')
+    .populate('premiseStore', PREMISE_STORE_POPULATE);
+
+  if (withItems === 'true') invoiceQuery.select('items');
+  if (withPayments === 'true') invoiceQuery.select('payments');
+
   try {
-    const [invoices, products] = await Promise.all([
-      InvoiceModel.find({})
-        .sort('expeditionDate')
-        .select('-payments')
-        .populate('customer', CUSTOMER_POPULATE)
-        .populate('premiseStore', PREMISE_STORE_POPULATE),
-      ProductModel.find({}).sort('name').select('-images -isInventoriable -sold -returned'),
-    ]);
+    const invoices = await invoiceQuery.exec();
+    let products: ProductHydrated[] = [];
+
+    if (withProducts === 'true') {
+      products = await ProductModel.find({}).sort('name').select('-images -isInventoriable -sold -returned');
+    }
 
     res.status(200).json({ invoices, products });
   } catch (error) {
