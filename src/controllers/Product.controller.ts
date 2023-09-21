@@ -40,10 +40,19 @@ const removeProductRefInCategories = async (productId: Types.ObjectId, categorie
 // ----------------------------------------------------------------------------
 // API
 // ----------------------------------------------------------------------------
-export async function list(_req: Request, res: Response) {
+export async function list(req: Request, res: Response) {
+  const { forList } = req.query;
+  const productQuery = ProductModel.find({}).sort('name');
+
+  if (forList === 'true') {
+    productQuery.select('-images -isInventoriable -sold -returned');
+  } else {
+    productQuery.populate('categories', 'name');
+  }
+
   try {
-    const products = await ProductModel.find({}).sort('name').populate('categories', 'name');
-    res.status(200).json({ products });
+    const products = await productQuery.exec();
+    res.status(200).json(products);
   } catch (error) {
     sendError(error, res);
   }
