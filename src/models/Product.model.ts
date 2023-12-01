@@ -55,6 +55,7 @@ const schema = new Schema<IProduct, Model<IProduct>>(
     },
     description: String,
     image: Object,
+    productSize: String,
     images: [{ type: Schema.Types.ObjectId, ref: 'ProductImage' }],
     isInventoriable: {
       type: Boolean,
