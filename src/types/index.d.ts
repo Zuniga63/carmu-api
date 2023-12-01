@@ -188,6 +188,7 @@ export interface IProduct {
   ref?: string;
   barcode?: string;
   description?: string;
+  productSize?: string;
   image?: IImage;
   images: Types.ObjectId[];
   isInventoriable: boolean;
