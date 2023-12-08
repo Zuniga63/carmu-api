@@ -354,6 +354,16 @@ const updateProductStocks = async ({ items }: InvoiceHydrated) => {
   return productUpdates;
 };
 
+async function createBonusCrhistmas({ cash, expeditionDate }: InvoiceHydrated) {
+  const date = dayjs(expeditionDate);
+  const isBefore = date.isBefore(dayjs('2023-12-01').startOf('day'));
+  const isAfter = date.isAfter(dayjs('2023-12-31').endOf('day'));
+  if (!cash || cash < 100e3 || isBefore || isAfter) return undefined;
+
+  const count = await InvoiceModel.countDocuments({ christmasTicket: true });
+  return count + 1;
+}
+
 export async function store(req: Request, res: Response) {
   const data = req.body;
   const { cashPayments, isSeparate, premiseStoreId } = data;
@@ -382,6 +392,7 @@ export async function store(req: Request, res: Response) {
     const saleOperations = buildSaleOperations(invoice);
     const products = await updateProductStocks(invoice);
     invoice.payments.push(...payments);
+    invoice.christmasTicket = await createBonusCrhistmas(invoice);
 
     await Promise.all([
       ...cashboxs.map((c) => c.save({ validateBeforeSave: false })),

@@ -110,6 +110,7 @@ const invoiceSchema = new Schema<IInvoice, InvoiceModelType>(
     payments: [paymentSchema],
     cancel: { type: Boolean, default: false },
     cancelMessage: String,
+    christmasTicket: { type: Number },
   },
   { timestamps: true },
 );

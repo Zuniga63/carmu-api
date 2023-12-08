@@ -259,6 +259,7 @@ export interface IInvoice {
   payments: IInvoicePayment[];
   cancel: boolean;
   cancelMessage?: string;
+  christmasTicket?: number;
 }
 
 export type InvoiceDocumentProps = {
