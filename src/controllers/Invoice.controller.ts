@@ -358,9 +358,9 @@ async function createBonusCrhistmas({ cash, expeditionDate }: InvoiceHydrated) {
   const date = dayjs(expeditionDate);
   const isBefore = date.isBefore(dayjs('2023-12-01').startOf('day'));
   const isAfter = date.isAfter(dayjs('2023-12-31').endOf('day'));
-  if (!cash || cash < 100e3 || isBefore || isAfter) return undefined;
+  if (!cash || cash < 100_000 || isBefore || isAfter) return undefined;
 
-  const count = await InvoiceModel.countDocuments({ christmasTicket: true });
+  const count = await InvoiceModel.countDocuments({ christmasTicket: { $ne: null } });
   return count + 1;
 }
 
