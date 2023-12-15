@@ -71,6 +71,7 @@ export async function store(req: Request, res: Response) {
       stock,
       sold: 0,
       returned: 0,
+      isInventoriable: Boolean(isInventoriable),
     });
 
     categories.forEach((category) => category.products.push(product._id));
