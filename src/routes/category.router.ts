@@ -198,4 +198,6 @@ router.route('/:categoryId').delete(controller.destroy);
  */
 router.route('/update-order').post(controller.storeNewOrder);
 
+router.route('/combine-clothes').post(controller.combineCategories);
+
 export default router;

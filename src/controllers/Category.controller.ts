@@ -1,6 +1,8 @@
 import { Request, Response } from 'express';
 import { destroyResource } from 'src/middleware/formData';
 import CategoryModel from 'src/models/Category.model';
+import ProductModel from 'src/models/Product.model';
+import SaleOperationModel from 'src/models/SaleOperation.model';
 import { CategoryHydrated, ProductHydrated, StoreCategoryRequest, UpdateCategoryRequest } from 'src/types';
 import NotFoundError from 'src/utils/errors/NotFoundError';
 import sendError from 'src/utils/sendError';
@@ -109,7 +111,7 @@ export async function storeNewOrder(req: Request, res: Response) {
   const categories: CategoryHydrated[] = [];
 
   try {
-    if (categoryIds instanceof Array<string>) {
+    if (Array.isArray(categoryIds) && categoryIds.every(id => typeof id === 'string')) {
       // Get the count of categories of three
       const count = await CategoryModel.count().where({ mainCategory });
 
@@ -138,4 +140,69 @@ export async function storeNewOrder(req: Request, res: Response) {
   } catch (error) {
     sendError(error, res);
   }
+}
+
+export async function combineCategories(_req: Request, res: Response) {
+  const categoriesToComnbine = [
+    '656b5d9b052ee17d01d569a0',
+    '656b5da8052ee17d01d569a8',
+    '656b5db4052ee17d01d569b0',
+    '656b5dc1052ee17d01d569b8',
+    '656b5dce052ee17d01d569c0',
+    '656b5ddd052ee17d01d569c8',
+    '656b5df0052ee17d01d569d0',
+    '656b5e35052ee17d01d569d8',
+  ];
+  const productCount = await ProductModel.countDocuments({ categories: { $in: ['635ee35f07b472b5971268bd'] } });
+
+  // Recupero las categorías que estan en la lista de categoriesToComnbine
+  const categories = await CategoryModel.find({ _id: { $in: categoriesToComnbine } });
+  // Recupero los productos que tienen alguna de las categorías de la lista
+  const products = await ProductModel.find({ categories: { $in: categoriesToComnbine } });
+
+  // Ahora recupero las operaciones de ventas que tienen las categorías de la lista
+  const saleOperations = await SaleOperationModel.find({ categories: { $in: categoriesToComnbine } });
+
+  // Recupero la categoría a la que se le van a asignar los productos
+  const category = await CategoryModel.findById('635ee35f07b472b5971268bd');
+
+  if (!category) return res.status(404).json({ message: 'Categoría no encontrada' });
+
+  // Asigno los productos a la nueva categoría y agrepo los productos a la nueva categoría
+  await Promise.all(
+    products.map(async (product) => {
+      product.categories = [category._id];
+      await product.save({ validateBeforeSave: false });
+    }),
+  );
+
+  // Agrego los producto a la neuva categoría
+  category.products = [...category.products, ...products.map((product) => product._id)];
+  await category.save({ validateBeforeSave: false });
+
+  // Asigno las operaciones de venta a la nueva categoría
+  await Promise.all(
+    saleOperations.map(async (saleOperation) => {
+      saleOperation.categories = [category._id];
+      await saleOperation.save({ validateBeforeSave: false });
+    }),
+  );
+
+  // Retiro los productos de las categorías anteriores
+  await Promise.all(
+    categories.map(async (category) => {
+      category.products = [];
+      await category.save({ validateBeforeSave: false });
+    }),
+  );
+
+  return res
+    .status(200)
+    .json({
+      categories: categories.length,
+      products: products.length,
+      productCount,
+      category: category.name,
+      saleOperations: saleOperations.length,
+    });
 }
