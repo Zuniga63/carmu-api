@@ -89,6 +89,7 @@ const invoiceSchema = new Schema<IInvoice, InvoiceModelType>(
     customerAddress: String,
     customerPhone: String,
     customerDocument: String,
+    customerEmail: String,
     customerDocumentType: { type: String, enum: ['CC', 'NIT', 'PAP', 'TI'] },
     sellerName: String,
     expeditionDate: Date,

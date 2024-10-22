@@ -39,11 +39,14 @@ export async function list(req: Request, res: Response) {
   if (from && typeof from === 'string' && dayjs(from).isValid()) {
     const date = dayjs(from).toDate();
     filter.expeditionDate = { $gte: date };
+  } else {
+    const date = dayjs(new Date()).subtract(1, 'month').toDate();
+    filter.expeditionDate = { $gte: date };
   }
 
   if (to && typeof to === 'string' && dayjs(to).isValid()) {
     const date = dayjs(to).toDate();
-    filter.expeditionDate = { $lte: date };
+    filter.expeditionDate = { ...filter.expeditionDate, $lte: date };
   }
 
   if (refresh === 'true') {
@@ -106,6 +109,7 @@ const setInvoiceCustomer = async (invoice: InvoiceHydrated, data: any) => {
   invoice.customerDocument ??= customerDocument;
   invoice.customerDocumentType ??= customerDocumentType;
   invoice.customerPhone ??= customerPhone;
+  invoice.customerEmail ??= data.customerEmail;
 
   if (customerId && isValidObjectId(customerId)) {
     const customer = await CustomerModel.findById(customerId);
@@ -132,6 +136,7 @@ const setInvoiceCustomer = async (invoice: InvoiceHydrated, data: any) => {
         documentType: customerDocumentType,
         address: customerAddress,
         contacts: customerPhone ? [{ description: 'Telefono', phone: customerPhone }] : [],
+        email: data.customerEmail,
       });
 
       invoice.customer = newCustomer._id;

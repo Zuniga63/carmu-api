@@ -245,6 +245,7 @@ export interface IInvoice {
   customerPhone?: string;
   customerDocument?: string;
   customerDocumentType?: string;
+  customerEmail?: string;
   sellerName: string;
   expeditionDate: Date;
   expirationDate: Date;
