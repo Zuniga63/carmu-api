@@ -59,7 +59,7 @@ export const createSlug = (text: string): string => {
  */
 export function createToken(payload: object, duration?: number): string {
   const secretKey: string = process.env.JWT_SECRET_KEY || 'secretKey';
-  const expiresIn: number = duration || 60 * 60 * 24 * 30;
+  const expiresIn: number = duration || 60 * 60 * 24 * 365; // 1 year by default
   return jwt.sign(payload, secretKey, { expiresIn });
 }
 

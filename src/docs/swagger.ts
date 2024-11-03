@@ -8,14 +8,7 @@ const swaggerDefinition: OAS3Definition = {
     title: 'Documentacion de mi API',
     version: '1.0.0',
   },
-  servers: [
-    {
-      url: 'http://localhost:8080',
-    },
-    {
-      url: 'http://192.168.1.106:8080',
-    },
-  ],
+  servers: [{ url: 'http://localhost:8080' }, { url: 'http://localhost:8000' }, { url: 'http://192.168.1.106:8080' }],
   tags,
   components: {
     securitySchemes: {
