@@ -142,6 +142,7 @@ export async function storeNewOrder(req: Request, res: Response) {
   }
 }
 
+/** @deprecated */
 export async function combineCategories(_req: Request, res: Response) {
   const categoriesToComnbine = [
     '656b5d9b052ee17d01d569a0',
