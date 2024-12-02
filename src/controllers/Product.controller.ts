@@ -207,3 +207,39 @@ export async function destroy(req: Request, res: Response) {
     sendError(error, res);
   }
 }
+
+export async function destroyAllProducts(_req: Request, res: Response) {
+  console.log('Iniciando eliminación de todos los productos');
+
+  const products = await ProductModel.find({}).populate<{ categories: CategoryHydrated[] }>('categories', 'products');
+  const totalProducts = products.length;
+
+  console.log(`Total de productos a eliminar: ${totalProducts}`);
+
+  // Procesar uno por uno
+  for (let i = 0; i < products.length; i++) {
+    const product = products[i];
+    console.log(`Procesando producto ${i + 1}/${totalProducts}`);
+
+    try {
+      // Eliminar producto
+      await product.remove();
+
+      // Limpiar recursos asociados
+      if (product.image?.publicId) {
+        await destroyResource(product.image.publicId);
+      }
+      if (product.categories.length) {
+        await removeProductRefInCategories(product._id, product.categories);
+      }
+
+      console.log(`Completado producto ${i + 1}: ${product.name}`);
+    } catch (error) {
+      console.error(`Error al procesar producto ${i + 1}: ${product.name}`, error);
+      // Continuar con el siguiente producto
+    }
+  }
+
+  console.log(`Eliminación completada: ${totalProducts} productos procesados`);
+  res.status(200).json({ message: 'Eliminación completada' });
+}
