@@ -29,19 +29,34 @@ import StoreModel, { StoreDocument } from 'src/models/Store.model';
 const PREMISE_STORE_POPULATE = '-invoices -defaultBox';
 const CUSTOMER_POPULATE = 'firstName lastName documentNumber';
 
+const normalizeString = (str: string): string => {
+  return str
+    .normalize('NFD') // Descompone los caracteres acentuados
+    .replace(/[\u0300-\u036f]/g, '') // Elimina los diacríticos
+    .toLowerCase(); // Convierte a minúsculas
+};
+
 // ----------------------------------------------------------------------------
 // GET: /invoices
 // ----------------------------------------------------------------------------
 export async function list(req: Request, res: Response) {
-  const { from, to, withItems, withPayments, withProducts, refresh } = req.query;
+  const {
+    from,
+    to,
+    withItems,
+    withPayments,
+    withProducts,
+    refresh,
+    page = 1,
+    limit = 100,
+    search,
+    invoiceNumber,
+  } = req.query;
   const filter: FilterQuery<IInvoice & { createdAt: string }> = {};
 
   if (from && typeof from === 'string' && dayjs(from).isValid()) {
-    const date = dayjs(from).toDate();
-    filter.expeditionDate = { $gte: date };
-  } else {
-    const date = dayjs(new Date()).subtract(1, 'month').toDate();
-    filter.expeditionDate = { $gte: date };
+    const fromDate = dayjs(from).toDate();
+    filter.expeditionDate = { $gte: fromDate };
   }
 
   if (to && typeof to === 'string' && dayjs(to).isValid()) {
@@ -54,24 +69,63 @@ export async function list(req: Request, res: Response) {
     filter.createdAt = { $gte: date };
   }
 
+  if (search && typeof search === 'string') {
+    const searchTerm = normalizeString(search.trim());
+    console.log(searchTerm);
+    filter.$or = [
+      { customerDocument: { $regex: searchTerm, $options: 'i' } },
+      { customerPhone: { $regex: searchTerm, $options: 'i' } },
+    ];
+  }
+
+  
+if (invoiceNumber && typeof invoiceNumber === 'string') {
+  // Separar el prefixNumber en prefix y number
+  const [prefix, numberStr] = invoiceNumber.split('-');
+  
+  if (numberStr) {
+    // Si tiene guión, buscar por ambos campos
+    filter.prefix = prefix;
+    filter.number = parseInt(numberStr, 10);
+  } else {
+    // Si no tiene guión, buscar solo por number
+    filter.number = parseInt(prefix, 10);
+  }
+}
+
+  const skip = (Number(page) - 1) * Number(limit);
+
   const invoiceQuery = InvoiceModel.find(filter)
     .sort('expeditionDate')
     .populate('customer', CUSTOMER_POPULATE)
     .select('-payments -items')
-    .populate('premiseStore', PREMISE_STORE_POPULATE);
+    .populate('premiseStore', PREMISE_STORE_POPULATE)
+    .skip(skip)
+    .limit(Number(limit));
 
   if (withItems === 'true') invoiceQuery.select('items');
   if (withPayments === 'true') invoiceQuery.select('payments');
 
   try {
-    const invoices = await invoiceQuery.exec();
+    const [invoices, total] = await Promise.all([invoiceQuery.exec(), InvoiceModel.countDocuments(filter)]);
+
     let products: ProductHydrated[] = [];
 
     if (withProducts === 'true') {
       products = await ProductModel.find({}).sort('name').select('-images -isInventoriable -sold -returned');
     }
 
-    res.status(200).json({ invoices, products });
+    res.status(200).json({
+      invoices,
+      products,
+      pagination: {
+        total,
+        count: invoices.length,
+        page: Number(page),
+        limit: Number(limit),
+        pages: Math.ceil(total / Number(limit)),
+      },
+    });
   } catch (error) {
     sendError(error, res);
   }
