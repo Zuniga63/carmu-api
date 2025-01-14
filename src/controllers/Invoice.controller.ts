@@ -40,18 +40,7 @@ const normalizeString = (str: string): string => {
 // GET: /invoices
 // ----------------------------------------------------------------------------
 export async function list(req: Request, res: Response) {
-  const {
-    from,
-    to,
-    withItems,
-    withPayments,
-    withProducts,
-    refresh,
-    page = 1,
-    limit = 100,
-    search,
-    invoiceNumber,
-  } = req.query;
+  const { from, to, withProducts, refresh, page = 1, limit = 100, search, invoiceNumber } = req.query;
   const filter: FilterQuery<IInvoice & { createdAt: string }> = {};
 
   if (from && typeof from === 'string' && dayjs(from).isValid()) {
@@ -78,33 +67,28 @@ export async function list(req: Request, res: Response) {
     ];
   }
 
-  
-if (invoiceNumber && typeof invoiceNumber === 'string') {
-  // Separar el prefixNumber en prefix y number
-  const [prefix, numberStr] = invoiceNumber.split('-');
-  
-  if (numberStr) {
-    // Si tiene guión, buscar por ambos campos
-    filter.prefix = prefix;
-    filter.number = parseInt(numberStr, 10);
-  } else {
-    // Si no tiene guión, buscar solo por number
-    filter.number = parseInt(prefix, 10);
+  if (invoiceNumber && typeof invoiceNumber === 'string') {
+    // Separar el prefixNumber en prefix y number
+    const [prefix, numberStr] = invoiceNumber.split('-');
+
+    if (numberStr) {
+      // Si tiene guión, buscar por ambos campos
+      filter.prefix = prefix;
+      filter.number = parseInt(numberStr, 10);
+    } else {
+      // Si no tiene guión, buscar solo por number
+      filter.number = parseInt(prefix, 10);
+    }
   }
-}
 
   const skip = (Number(page) - 1) * Number(limit);
 
   const invoiceQuery = InvoiceModel.find(filter)
-    .sort('expeditionDate')
+    .sort({ expeditionDate: -1 })
     .populate('customer', CUSTOMER_POPULATE)
-    .select('-payments -items')
     .populate('premiseStore', PREMISE_STORE_POPULATE)
     .skip(skip)
     .limit(Number(limit));
-
-  if (withItems === 'true') invoiceQuery.select('items');
-  if (withPayments === 'true') invoiceQuery.select('payments');
 
   try {
     const [invoices, total] = await Promise.all([invoiceQuery.exec(), InvoiceModel.countDocuments(filter)]);
