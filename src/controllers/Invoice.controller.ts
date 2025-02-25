@@ -44,7 +44,9 @@ export async function list(req: Request, res: Response) {
   const filter: FilterQuery<IInvoice & { createdAt: string }> = {};
 
   if (all) {
-    const invoices = await InvoiceModel.find({}).populate('customer', CUSTOMER_POPULATE).populate('premiseStore', PREMISE_STORE_POPULATE);
+    const invoices = await InvoiceModel.find({})
+      .populate('customer', CUSTOMER_POPULATE)
+      .populate('premiseStore', PREMISE_STORE_POPULATE);
     res.status(200).json(invoices);
     return;
   }
@@ -89,7 +91,6 @@ export async function list(req: Request, res: Response) {
 
   const skip = (Number(page) - 1) * Number(limit);
 
-
   const invoiceQuery = InvoiceModel.find(filter)
     .sort({ expeditionDate: -1 })
     .populate('customer', CUSTOMER_POPULATE)
@@ -120,11 +121,6 @@ export async function list(req: Request, res: Response) {
   } catch (error) {
     sendError(error, res);
   }
-}
-
-export async function getAllInvoices(req: Request, res: Response) {
-  const invoices = await InvoiceModel.find({}).populate('customer', CUSTOMER_POPULATE).populate('premiseStore', PREMISE_STORE_POPULATE);
-  res.status(200).json(invoices);
 }
 
 // ----------------------------------------------------------------------------
