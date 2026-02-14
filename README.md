@@ -14,7 +14,6 @@ This project use the next dependencies for dev
 | ------------------- | ------------------------------ |
 | Eslint              | Use Eslint with standard rules |
 | Prettier            | For format the style code      |
-| Husky & lint-staged | For control the pre-commit     |
 
 ## Installation
 

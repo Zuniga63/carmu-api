@@ -58,7 +58,6 @@ MVC-inspired structure under `src/`:
 
 - Prettier: single quotes, semicolons, trailing commas, 120 char width, 2-space indent
 - ESLint: standard + prettier config; unused vars prefixed with `_` are allowed
-- Pre-commit: Husky + lint-staged runs ESLint on changed files
 - Conventional commits with optional scope: `feat(invoice): ...`, `fix: ...`, `refactor: ...`
 
 ## Environment
