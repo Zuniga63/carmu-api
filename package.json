@@ -13,7 +13,10 @@
     "format:check": "prettier --check src/**/*.ts",
     "format:write": "prettier --write src/**/*.ts",
     "prepare": "husky install",
-    "presets": "ts-node src/utils/cloudinary/index.ts"
+    "presets": "ts-node src/utils/cloudinary/index.ts",
+    "db:up": "docker compose up -d",
+    "db:down": "docker compose down",
+    "db:sync": "node scripts/db-sync.mjs"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",

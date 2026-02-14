@@ -1,0 +1,13 @@
+services:
+  mongodb:
+    image: mongo:6
+    container_name: carmu-mongodb
+    ports:
+      - '27017:27017'
+    volumes:
+      - mongodb_data:/data/db
+    environment:
+      - TZ=America/Bogota
+
+volumes:
+  mongodb_data:

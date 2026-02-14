@@ -25,6 +25,54 @@ This project use the next dependencies for dev
 5. After adding Cloudinary credentials run the script for create the presets `pnpm run presets`
 6. Finished for dev run `npm run dev` and for production `npm run start`
 
+## Local Database (Docker)
+
+To work with a local MongoDB instance instead of Atlas:
+
+### Prerequisites
+
+- [Docker](https://www.docker.com/) installed and running
+
+### Setup
+
+1. Start the MongoDB container:
+
+```bash
+pnpm db:up
+```
+
+2. (Optional) Sync production data to local:
+
+```bash
+pnpm db:sync
+```
+
+> This reads `DB_URL` from `.env`, dumps the production database, and restores it into the local container. Make sure `DB_URL` points to the production Atlas URL before running this command.
+
+3. Switch to the local database by updating `.env`:
+
+```env
+# Comment the Atlas URL
+# DB_URL="mongodb+srv://..."
+
+# Uncomment the local URL
+DB_URL="mongodb://localhost:27017/carmu-main"
+```
+
+4. Start the API:
+
+```bash
+pnpm dev
+```
+
+### Available Scripts
+
+| Script         | Description                                       |
+| -------------- | ------------------------------------------------- |
+| `pnpm db:up`   | Start the local MongoDB container (detached mode) |
+| `pnpm db:down` | Stop the local MongoDB container                  |
+| `pnpm db:sync` | Dump production database and restore locally      |
+
 ## Diagram Model
 
 [![CarmuProject drawio](https://user-images.githubusercontent.com/50376585/194598117-13f5bfec-fb8d-48d4-80c6-c6a22eb6af8c.svg)](https://drive.google.com/file/d/122_Lb7Mxaz_KzhNN6k6xW_32uyB0su5e/view?usp=sharing)
