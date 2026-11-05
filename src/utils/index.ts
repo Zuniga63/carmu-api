@@ -51,6 +51,18 @@ export const createSlug = (text: string): string => {
     : '';
 };
 
+export const JWT_ALGORITHM = 'HS256';
+
+/**
+ * Returns the secret used to sign and verify JWTs.
+ * Throws if it is not configured so tokens are never signed with a predictable key.
+ */
+export function getJwtSecret(): string {
+  const secretKey = process.env.JWT_SECRET_KEY;
+  if (!secretKey) throw new Error('JWT_SECRET_KEY no está configurada.');
+  return secretKey;
+}
+
 /**
  *
  * @param payload Information to save into token
@@ -58,9 +70,8 @@ export const createSlug = (text: string): string => {
  * @returns
  */
 export function createToken(payload: object, duration?: number): string {
-  const secretKey: string = process.env.JWT_SECRET_KEY || 'secretKey';
   const expiresIn: number = duration || 60 * 60 * 24 * 365; // 1 year by default
-  return jwt.sign(payload, secretKey, { expiresIn });
+  return jwt.sign(payload, getJwtSecret(), { expiresIn, algorithm: JWT_ALGORITHM });
 }
 
 export const removeNonNumericChars = (value: any) => String(value).replace(/[^\d]/g, '');
